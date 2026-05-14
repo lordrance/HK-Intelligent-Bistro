@@ -28,6 +28,8 @@ const C = {
 export default function AssistantScreen() {
   const shell = useAppShell();
   const catalog = useBistroStore((s) => s.catalog);
+  const catalogLoading = useBistroStore((s) => s.catalogLoading);
+  const loadCatalog = useBistroStore((s) => s.loadCatalog);
   const cart = useBistroStore((s) => s.cart);
   const messages = useBistroStore((s) => s.messages);
   const pending = useBistroStore((s) => s.pending);
@@ -41,7 +43,8 @@ export default function AssistantScreen() {
 
   const onSend = async () => {
     const t = text.trim();
-    if (!t || !catalog) return;
+    if (!t) return;
+    if (catalogLoading || !catalog) return;
     setBusy(true);
     setText("");
     try {
@@ -50,6 +53,8 @@ export default function AssistantScreen() {
       setBusy(false);
     }
   };
+
+  const canSend = !!catalog && !catalogLoading && !busy;
 
   const bubbleMaxStyle = shell.isWeb ? { maxWidth: Math.min(560, shell.innerWidth * 0.92) } : { maxWidth: "86%" as const };
 
@@ -64,6 +69,29 @@ export default function AssistantScreen() {
               Hybrid policy: high-confidence add-only intents apply instantly; destructive edits ask for confirmation
               first.
             </Text>
+            {catalogLoading ? (
+              <Text style={{ fontSize: 13, color: C.goldSoft, marginTop: 4 }}>Loading menu…</Text>
+            ) : !catalog ? (
+              <View style={{ marginTop: 10, gap: 10 }}>
+                <Text style={{ fontSize: 13, color: C.muted }}>
+                  The menu is not available. Fix the API connection, then tap Retry.
+                </Text>
+                <Pressable
+                  onPress={() => void loadCatalog(getApiBaseUrl())}
+                  style={{
+                    alignSelf: "flex-start",
+                    paddingHorizontal: 16,
+                    paddingVertical: 10,
+                    borderRadius: 12,
+                    borderWidth: 1,
+                    borderColor: "rgba(201,162,77,0.45)",
+                    backgroundColor: "rgba(201,162,77,0.1)",
+                  }}
+                >
+                  <Text style={{ color: C.goldSoft, fontWeight: "800" }}>Retry</Text>
+                </Pressable>
+              </View>
+            ) : null}
           </View>
 
           <ScrollView
@@ -140,9 +168,9 @@ export default function AssistantScreen() {
                 onSubmitEditing={onSend}
                 editable={!busy}
               />
-              <Pressable onPress={onSend} disabled={busy}>
+              <Pressable onPress={onSend} disabled={!canSend}>
                 <LinearGradient colors={[C.gold, C.goldSoft]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
-                  <View style={{ paddingHorizontal: 16, paddingVertical: 10, borderRadius: 14 }}>
+                  <View style={{ paddingHorizontal: 16, paddingVertical: 10, borderRadius: 14, opacity: canSend ? 1 : 0.45 }}>
                     <Text style={{ fontWeight: "900", color: "#1a1204" }}>{busy ? "…" : "Send"}</Text>
                   </View>
                 </LinearGradient>

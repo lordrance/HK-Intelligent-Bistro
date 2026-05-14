@@ -45,7 +45,7 @@ export const useBistroStore = create<{
   undo: () => void;
 }>((set, get) => ({
   catalog: null,
-  catalogLoading: false,
+  catalogLoading: true,
   cart: emptyCart(),
   messages: [],
   pending: null,

@@ -3,6 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useBistroStore } from "../../src/store/bistroStore";
 import { cartTotal, lineUnitPrice } from "../../src/lib/pricing";
 import { useAppShell } from "../../src/lib/responsive";
+import { getApiBaseUrl } from "../../src/lib/api";
 
 const C = {
   bg: "#07080b",
@@ -17,17 +18,46 @@ const C = {
 export default function CartScreen() {
   const shell = useAppShell();
   const catalog = useBistroStore((s) => s.catalog);
+  const catalogLoading = useBistroStore((s) => s.catalogLoading);
+  const loadCatalog = useBistroStore((s) => s.loadCatalog);
   const cart = useBistroStore((s) => s.cart);
   const setQty = useBistroStore((s) => s.setLineQty);
   const removeLine = useBistroStore((s) => s.removeLine);
   const clearCart = useBistroStore((s) => s.clearCart);
   const undo = useBistroStore((s) => s.undo);
 
-  if (!catalog) {
+  if (catalogLoading) {
     return (
       <View style={[styles.page, { paddingTop: 56, paddingHorizontal: shell.pagePadding }]}>
         <View style={styles.shell}>
           <Text style={{ color: C.muted }}>Loading cart…</Text>
+        </View>
+      </View>
+    );
+  }
+
+  if (!catalog) {
+    return (
+      <View style={[styles.page, { paddingTop: 56, paddingHorizontal: shell.pagePadding }]}>
+        <View style={styles.shell}>
+          <Text style={[styles.title, { marginBottom: 10 }]}>Menu unavailable</Text>
+          <Text style={{ color: C.muted, marginBottom: 16 }}>
+            The menu could not be loaded, so prices and dish names cannot be shown. Check the API and try again.
+          </Text>
+          <Pressable
+            onPress={() => void loadCatalog(getApiBaseUrl())}
+            style={{
+              alignSelf: "flex-start",
+              paddingHorizontal: 20,
+              paddingVertical: 12,
+              borderRadius: 14,
+              borderWidth: 1,
+              borderColor: "rgba(201,162,77,0.55)",
+              backgroundColor: "rgba(201,162,77,0.12)",
+            }}
+          >
+            <Text style={{ color: C.goldSoft, fontWeight: "800" }}>Retry</Text>
+          </Pressable>
         </View>
       </View>
     );

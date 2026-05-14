@@ -13,6 +13,7 @@ import {
 import { useBistroStore } from "../../src/store/bistroStore";
 import type { Dish } from "@hk/shared";
 import { useAppShell } from "../../src/lib/responsive";
+import { getApiBaseUrl } from "../../src/lib/api";
 
 const C = {
   bg: "#07080b",
@@ -33,6 +34,7 @@ export default function MenuScreen() {
   const shell = useAppShell();
   const catalog = useBistroStore((s) => s.catalog);
   const loading = useBistroStore((s) => s.catalogLoading);
+  const loadCatalog = useBistroStore((s) => s.loadCatalog);
   const [q, setQ] = useState("");
 
   const filtered = useMemo(() => {
@@ -57,12 +59,40 @@ export default function MenuScreen() {
     return [...m.entries()];
   }, [filtered]);
 
-  if (loading || !catalog) {
+  if (loading) {
     return (
       <View style={[styles.page, { paddingTop: 56, paddingHorizontal: shell.pagePadding }]}>
         <View style={styles.shell}>
           <Text style={styles.hero}>Intelligent Bistro</Text>
           <Text style={styles.sub}>Preparing the menu…</Text>
+        </View>
+      </View>
+    );
+  }
+
+  if (!catalog) {
+    return (
+      <View style={[styles.page, { paddingTop: 56, paddingHorizontal: shell.pagePadding }]}>
+        <View style={styles.shell}>
+          <Text style={styles.hero}>Intelligent Bistro</Text>
+          <Text style={[styles.sub, { marginBottom: 16 }]}>
+            We could not load the menu. Make sure the API is running and EXPO_PUBLIC_API_BASE_URL points to it (e.g.
+            http://10.0.2.2:8787 on Android emulator).
+          </Text>
+          <Pressable
+            onPress={() => void loadCatalog(getApiBaseUrl())}
+            style={{
+              alignSelf: "flex-start",
+              paddingHorizontal: 20,
+              paddingVertical: 12,
+              borderRadius: 14,
+              borderWidth: 1,
+              borderColor: "rgba(201,162,77,0.55)",
+              backgroundColor: "rgba(201,162,77,0.12)",
+            }}
+          >
+            <Text style={{ color: "#f3e7c7", fontWeight: "800" }}>Retry</Text>
+          </Pressable>
         </View>
       </View>
     );

@@ -21,6 +21,7 @@ export default function DishDetailScreen() {
   const router = useRouter();
   const shell = useAppShell();
   const catalog = useBistroStore((s) => s.catalog);
+  const catalogLoading = useBistroStore((s) => s.catalogLoading);
   const addLine = useBistroStore((s) => s.addLineFromMenu);
   const { height } = useWindowDimensions();
 
@@ -37,7 +38,36 @@ export default function DishDetailScreen() {
     setSelected(m);
   }, [dish?.id]);
 
-  if (!catalog || !dish) {
+  if (catalogLoading) {
+    return (
+      <Pressable style={styles.backdrop} onPress={() => router.back()}>
+        <View style={styles.centerBox}>
+          <Text style={{ color: "#fff" }}>Loading dish…</Text>
+          <Pressable onPress={() => router.back()} style={styles.backBtn}>
+            <Text style={{ color: C.goldSoft, fontWeight: "800" }}>Back</Text>
+          </Pressable>
+        </View>
+      </Pressable>
+    );
+  }
+
+  if (!catalog) {
+    return (
+      <Pressable style={styles.backdrop} onPress={() => router.back()}>
+        <View style={styles.centerBox}>
+          <Text style={{ color: "#fff" }}>Menu unavailable</Text>
+          <Text style={{ color: C.muted, marginTop: 8, textAlign: "center" }}>
+            The catalog failed to load. Go back and tap Retry on the menu tab.
+          </Text>
+          <Pressable onPress={() => router.back()} style={styles.backBtn}>
+            <Text style={{ color: C.goldSoft, fontWeight: "800" }}>Back</Text>
+          </Pressable>
+        </View>
+      </Pressable>
+    );
+  }
+
+  if (!dish) {
     return (
       <Pressable style={styles.backdrop} onPress={() => router.back()}>
         <View style={styles.centerBox}>
