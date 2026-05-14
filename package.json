@@ -1,0 +1,12 @@
+{
+  "name": "hk-intelligent-bistro",
+  "private": true,
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "dev:server": "pnpm --filter @hk/server dev",
+    "dev:mobile": "pnpm --filter @hk/mobile start",
+    "build:shared": "pnpm --filter @hk/shared build",
+    "build:server": "pnpm --filter @hk/server build",
+    "lint": "pnpm -r lint"
+  }
+}

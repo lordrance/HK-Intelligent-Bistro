@@ -1,0 +1,144 @@
+{
+  "version": "2026.05.14",
+  "currency": "HKD",
+  "dishes": [
+    {
+      "id": "d_hk_milk_tea",
+      "name": "港式丝袜奶茶",
+      "description": "茶胆浓郁，奶香顺滑。",
+      "category": "饮品",
+      "basePrice": 28,
+      "imageUrl": "https://images.unsplash.com/photo-1544787219-7f65ccb81c85?w=800&q=80",
+      "aliases": ["奶茶", "丝袜奶茶", "港奶"],
+      "modifierGroups": [
+        {
+          "id": "mg_size",
+          "label": "规格",
+          "required": true,
+          "maxSelect": 1,
+          "options": [
+            { "id": "mo_size_m", "label": "中杯", "priceDelta": 0 },
+            { "id": "mo_size_l", "label": "大杯", "priceDelta": 6 }
+          ]
+        },
+        {
+          "id": "mg_ice",
+          "label": "冰量",
+          "required": true,
+          "maxSelect": 1,
+          "options": [
+            { "id": "mo_ice_hot", "label": "热", "priceDelta": 0 },
+            { "id": "mo_ice_less", "label": "少冰", "priceDelta": 0 },
+            { "id": "mo_ice_normal", "label": "正常冰", "priceDelta": 0 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "d_lemon_tea",
+      "name": "冻柠茶",
+      "description": "清爽解腻，柠檬香气足。",
+      "category": "饮品",
+      "basePrice": 26,
+      "imageUrl": "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=800&q=80",
+      "aliases": ["柠茶", "柠檬茶"],
+      "modifierGroups": [
+        {
+          "id": "mg_size",
+          "label": "规格",
+          "required": true,
+          "maxSelect": 1,
+          "options": [
+            { "id": "mo_size_m", "label": "中杯", "priceDelta": 0 },
+            { "id": "mo_size_l", "label": "大杯", "priceDelta": 6 }
+          ]
+        },
+        {
+          "id": "mg_sugar",
+          "label": "甜度",
+          "required": true,
+          "maxSelect": 1,
+          "options": [
+            { "id": "mo_sugar_full", "label": "全糖", "priceDelta": 0 },
+            { "id": "mo_sugar_half", "label": "半糖", "priceDelta": 0 },
+            { "id": "mo_sugar_zero", "label": "无糖", "priceDelta": 0 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "d_spicy_chicken",
+      "name": "香辣鸡排包",
+      "description": "酥脆鸡排配秘制辣酱与爽脆生菜。",
+      "category": "主食",
+      "basePrice": 52,
+      "imageUrl": "https://images.unsplash.com/photo-1606755962773-d324e788a873?w=800&q=80",
+      "aliases": ["鸡排包", "辣鸡包", "香辣鸡"],
+      "modifierGroups": [
+        {
+          "id": "mg_spice",
+          "label": "辣度",
+          "required": true,
+          "maxSelect": 1,
+          "options": [
+            { "id": "mo_spice_mild", "label": "微辣", "priceDelta": 0 },
+            { "id": "mo_spice_hot", "label": "中辣", "priceDelta": 0 },
+            { "id": "mo_spice_extra", "label": "特辣", "priceDelta": 2 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "d_bbq_pork_rice",
+      "name": "蜜汁叉烧饭",
+      "description": "半肥瘦叉烧，淋蜜汁，配米饭与时蔬。",
+      "category": "主食",
+      "basePrice": 68,
+      "imageUrl": "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=800&q=80",
+      "aliases": ["叉烧饭", "叉烧"],
+      "modifierGroups": [
+        {
+          "id": "mg_rice",
+          "label": "米饭",
+          "required": true,
+          "maxSelect": 1,
+          "options": [
+            { "id": "mo_rice_normal", "label": "正常饭量", "priceDelta": 0 },
+            { "id": "mo_rice_extra", "label": "加饭", "priceDelta": 8 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "d_curry_fishball",
+      "name": "咖喱鱼蛋",
+      "description": "街头经典，咖喱浓香。",
+      "category": "小食",
+      "basePrice": 32,
+      "imageUrl": "https://images.unsplash.com/photo-1562967914-608f82629710?w=800&q=80",
+      "aliases": ["鱼蛋", "咖喱鱼蛋"],
+      "modifierGroups": []
+    },
+    {
+      "id": "d_egg_tart",
+      "name": "葡式蛋挞",
+      "description": "酥皮层次丰富，蛋奶馅香滑。",
+      "category": "甜品",
+      "basePrice": 18,
+      "imageUrl": "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=800&q=80",
+      "aliases": ["蛋挞"],
+      "modifierGroups": [
+        {
+          "id": "mg_warm",
+          "label": "温度",
+          "required": true,
+          "maxSelect": 1,
+          "options": [
+            { "id": "mo_warm_hot", "label": "热食", "priceDelta": 0 },
+            { "id": "mo_warm_room", "label": "常温", "priceDelta": 0 }
+          ]
+        }
+      ]
+    }
+  ]
+}
