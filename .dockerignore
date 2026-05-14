@@ -1,0 +1,26 @@
+# Git & local artifacts
+.git
+.github
+**/.DS_Store
+
+# Dependencies & build outputs (rebuilt inside the image)
+**/node_modules
+**/dist
+**/.turbo
+**/*.tsbuildinfo
+
+# Expo client (not required for API image)
+apps/mobile
+**/.expo
+**/.expo-shared
+**/web-build
+
+# Secrets & logs
+.env
+.env.*
+*.log
+
+# Tooling / IDE
+.idea
+.vscode
+coverage

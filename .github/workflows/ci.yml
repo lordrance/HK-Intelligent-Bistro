@@ -34,3 +34,10 @@ jobs:
 
       - name: Typecheck mobile
         run: pnpm --filter @hk/mobile exec tsc --noEmit
+
+  docker-image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build API Docker image
+        run: docker build -t hk-intelligent-bistro-api:ci .

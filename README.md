@@ -62,6 +62,26 @@ With `expo start --web`, shell content is centered up to **960px**; the menu use
 
 Pending actions show **human-readable dish names and modifier labels** via `formatCartActionSummary` in `@hk/shared` (`packages/shared/src/cart/format-action-summary.ts`).
 
+## Docker (API only)
+
+The **Expo client** stays local (`pnpm dev:mobile` / Expo Go) for the best dev experience. The **Fastify API** is containerized.
+
+Prerequisites: [Docker Engine](https://docs.docker.com/engine/install/) and Docker Compose v2.
+
+1. Ensure `.env` exists (see `.env.example`) with at least `DEEPSEEK_API_KEY`. Compose reads variables from a `.env` file in the same directory as `docker-compose.yml` for interpolation.
+
+2. Build and run:
+
+```bash
+docker compose up --build
+```
+
+3. API: `http://localhost:8787` (override host port with `API_PORT=9888 docker compose up`).
+
+4. Point the mobile app at the API, e.g. `EXPO_PUBLIC_API_BASE_URL=http://localhost:8787` (or your LAN IP from a device).
+
+`Dockerfile` builds `@hk/shared` and `@hk/server` inside the image. `docker-compose.yml` defines the `api` service with a health check on `/health`.
+
 ## Roadmap
 
-Voice input, order history, stricter checkout, E2E tests, Docker Compose.
+Voice input, order history, stricter checkout, E2E tests, optional static web image for Expo export.
