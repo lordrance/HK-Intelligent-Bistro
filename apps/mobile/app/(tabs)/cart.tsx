@@ -1,21 +1,28 @@
 import { LinearGradient } from "expo-linear-gradient";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { StyleSheet } from "react-native";
+import { useRouter } from "expo-router";
+import {
+  Box,
+  Button,
+  ButtonText,
+  HStack,
+  Heading,
+  Pressable,
+  ScrollView,
+  Text,
+  VStack,
+} from "@gluestack-ui/themed";
+import { useAuthStore } from "../../src/store/authStore";
 import { useBistroStore } from "../../src/store/bistroStore";
 import { cartTotal, lineUnitPrice } from "../../src/lib/pricing";
 import { useAppShell } from "../../src/lib/responsive";
 import { getApiBaseUrl } from "../../src/lib/api";
-
-const C = {
-  bg: "#07080b",
-  text: "#fdf8ef",
-  muted: "rgba(255,255,255,0.55)",
-  gold: "#c9a24d",
-  goldSoft: "#f3e7c7",
-  line: "rgba(255,255,255,0.08)",
-  glass: "rgba(255,255,255,0.04)",
-};
+import { scrollViewFill } from "../../src/lib/scrollStyles";
+import { formatCatalogMoney } from "../../src/lib/formatMoney";
+import { T } from "../../src/theme/tokens";
 
 export default function CartScreen() {
+  const router = useRouter();
   const shell = useAppShell();
   const catalog = useBistroStore((s) => s.catalog);
   const catalogLoading = useBistroStore((s) => s.catalogLoading);
@@ -25,215 +32,231 @@ export default function CartScreen() {
   const removeLine = useBistroStore((s) => s.removeLine);
   const clearCart = useBistroStore((s) => s.clearCart);
   const undo = useBistroStore((s) => s.undo);
+  const resetAfterLogout = useBistroStore((s) => s.resetAfterLogout);
+
+  const titleSize = shell.compactWeb ? T.titlePageCompact : T.titlePage;
+
+  async function onLogout() {
+    await useAuthStore.getState().clearSession();
+    resetAfterLogout();
+    router.replace("/login");
+  }
 
   if (catalogLoading) {
     return (
-      <View style={[styles.page, { paddingTop: 56, paddingHorizontal: shell.pagePadding }]}>
-        <View style={styles.shell}>
-          <Text style={{ color: C.muted }}>Loading cart…</Text>
-        </View>
-      </View>
+      <Box flex={1} bg={T.bg} pt={56} px={shell.pagePadding}>
+        <LinearGradient colors={["#0a0c12", T.bg, "#12151f"]} style={StyleSheet.absoluteFill} />
+        <VStack maxWidth={960} w="100%" alignSelf="center">
+          <Text color={T.muted}>Loading cart…</Text>
+        </VStack>
+      </Box>
     );
   }
 
   if (!catalog) {
     return (
-      <View style={[styles.page, { paddingTop: 56, paddingHorizontal: shell.pagePadding }]}>
-        <View style={styles.shell}>
-          <Text style={[styles.title, { marginBottom: 10 }]}>Menu unavailable</Text>
-          <Text style={{ color: C.muted, marginBottom: 16 }}>
+      <Box flex={1} bg={T.bg} pt={56} px={shell.pagePadding}>
+        <LinearGradient colors={["#0a0c12", T.bg, "#12151f"]} style={StyleSheet.absoluteFill} />
+        <VStack maxWidth={960} w="100%" alignSelf="center" space="md">
+          <Heading size="xl" fontWeight="$black" color={T.text} fontSize={titleSize} mb="$2.5">
+            Menu unavailable
+          </Heading>
+          <Text color={T.muted}>
             The menu could not be loaded, so prices and dish names cannot be shown. Check the API and try again.
           </Text>
-          <Pressable
-            onPress={() => void loadCatalog(getApiBaseUrl())}
-            style={{
-              alignSelf: "flex-start",
-              paddingHorizontal: 20,
-              paddingVertical: 12,
-              borderRadius: 14,
-              borderWidth: 1,
-              borderColor: "rgba(201,162,77,0.55)",
-              backgroundColor: "rgba(201,162,77,0.12)",
-            }}
-          >
-            <Text style={{ color: C.goldSoft, fontWeight: "800" }}>Retry</Text>
-          </Pressable>
-        </View>
-      </View>
+          <Button variant="outline" action="primary" alignSelf="flex-start" onPress={() => void loadCatalog(getApiBaseUrl())}>
+            <ButtonText>Retry</ButtonText>
+          </Button>
+        </VStack>
+      </Box>
     );
   }
 
   const total = cartTotal(catalog, cart);
 
   return (
-    <View style={[styles.page, { paddingTop: 52, paddingHorizontal: shell.pagePadding }]}>
-      <View style={styles.shell}>
-        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 14 }}>
-        <View style={{ gap: 6 }}>
-          <Text style={styles.kicker}>Your order</Text>
-          <Text style={styles.title}>Cart</Text>
-        </View>
-        <View style={{ alignItems: "flex-end", gap: 4 }}>
-          <Text style={{ fontSize: 12, color: "rgba(255,255,255,0.45)" }}>Total</Text>
-          <Text style={{ fontSize: 24, fontWeight: "900", color: C.goldSoft }}>
-            {catalog.currency} {total}
-          </Text>
-        </View>
-      </View>
-
-      <View style={{ flexDirection: "row", gap: 10, marginBottom: 14 }}>
-        <Pressable style={[styles.toolBtn, { flex: 1 }]} onPress={() => undo()}>
-          <Text style={{ color: "#f3f0e6", fontWeight: "800", textAlign: "center" }}>Undo</Text>
-        </Pressable>
-        <Pressable style={[styles.toolBtn, styles.dangerBtn]} onPress={() => clearCart()}>
-          <Text style={{ color: "#fecaca", fontWeight: "800", textAlign: "center" }}>Clear</Text>
-        </Pressable>
-      </View>
-
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
-        {cart.items.length === 0 ? (
-          <View style={styles.empty}>
-            <Text style={{ fontSize: 40 }}>🥂</Text>
-            <Text style={{ fontSize: 16, fontWeight: "800", color: "#f3f0e6" }}>Your cart is empty</Text>
-            <Text style={{ fontSize: 13, color: C.muted, textAlign: "center", lineHeight: 20 }}>
-              Browse the menu or ask the concierge to add items in one sentence.
+    <Box flex={1} bg={T.bg} pt="$12" px={shell.pagePadding}>
+      <LinearGradient colors={["#0a0c12", T.bg, "#12151f"]} style={StyleSheet.absoluteFill} />
+      <VStack flex={1} maxWidth={960} w="100%" alignSelf="center">
+        <HStack justifyContent="space-between" alignItems="flex-end" mb="$3.5">
+          <VStack space="xs">
+            <Text fontSize="$xs" color={T.goldDim} letterSpacing={2} textTransform="uppercase">
+              Your order
             </Text>
-          </View>
-        ) : (
-          <View style={{ gap: 14 }}>
-            {cart.items.map((li) => {
-              const dish = catalog.dishes.find((d) => d.id === li.dishId);
-              const unit = lineUnitPrice(catalog, li.dishId, li.selectedModifiers);
-              const lineTotal = unit * li.qty;
-              return (
-                <View key={li.lineId} style={styles.card}>
-                  <View style={{ flexDirection: "row", justifyContent: "space-between", gap: 12 }}>
-                    <View style={{ flex: 1, gap: 6 }}>
-                      <Text style={{ fontSize: 17, fontWeight: "900", color: C.text }}>{dish?.name ?? li.dishId}</Text>
-                      <Text style={{ fontSize: 12, color: "rgba(255,255,255,0.45)" }}>
-                        lineId: {li.lineId.slice(0, 8)}…
-                      </Text>
-                    </View>
-                    <Text style={{ fontSize: 16, fontWeight: "900", color: C.goldSoft }}>
-                      {catalog.currency} {lineTotal}
-                    </Text>
-                  </View>
+            <Heading size="xl" fontWeight="$black" color={T.text} fontSize={titleSize}>
+              Cart
+            </Heading>
+          </VStack>
+          <VStack alignItems="flex-end" space="xs">
+            <Text fontSize="$xs" color="rgba(255,255,255,0.45)">
+              Total
+            </Text>
+            <Text fontSize="$2xl" fontWeight="$black" color={T.goldSoft}>
+              {formatCatalogMoney(catalog.currency, total)}
+            </Text>
+          </VStack>
+        </HStack>
 
-                  <View style={{ height: 1, backgroundColor: C.line, marginVertical: 12 }} />
-
-                  <View style={{ gap: 6 }}>
-                    {(dish?.modifierGroups ?? []).map((g) => {
-                      const optId = li.selectedModifiers[g.id];
-                      const opt = g.options.find((o) => o.id === optId);
-                      return (
-                        <Text key={g.id} style={{ fontSize: 13, color: C.muted }}>
-                          {g.label}: <Text style={{ color: "rgba(233,213,161,0.9)" }}>{opt?.label ?? optId}</Text>
-                        </Text>
-                      );
-                    })}
-                  </View>
-
-                  <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 8 }}>
-                    <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-                      <Pressable onPress={() => setQty(li.lineId, Math.max(0, li.qty - 1))} style={styles.step}>
-                        <Text style={{ color: "#fff", fontSize: 20, fontWeight: "800" }}>−</Text>
-                      </Pressable>
-                      <Text style={{ fontSize: 18, fontWeight: "900", color: "#fff", minWidth: 28, textAlign: "center" }}>
-                        {li.qty}
-                      </Text>
-                      <Pressable onPress={() => setQty(li.lineId, li.qty + 1)} style={[styles.step, styles.stepPlus]}>
-                        <Text style={{ color: C.goldSoft, fontSize: 20, fontWeight: "800" }}>+</Text>
-                      </Pressable>
-                    </View>
-
-                    <Pressable onPress={() => removeLine(li.lineId)} style={styles.delBtn}>
-                      <Text style={{ color: "rgba(255,255,255,0.65)", fontWeight: "800" }}>Remove</Text>
-                    </Pressable>
-                  </View>
-                </View>
-              );
-            })}
-          </View>
-        )}
-      </ScrollView>
-
-      {cart.items.length > 0 ? (
-        <View style={styles.checkoutWrap}>
-          <LinearGradient
-            colors={[C.gold, C.goldSoft, C.gold]}
-            start={{ x: 0, y: 0.5 }}
-            end={{ x: 1, y: 0.5 }}
-            style={styles.checkout}
+        <HStack space="sm" mb="$3.5">
+          <Button flex={1} variant="outline" action="secondary" onPress={() => undo()}>
+            <ButtonText>Undo</ButtonText>
+          </Button>
+          <Button
+            flex={1}
+            variant="outline"
+            action="secondary"
+            borderColor="rgba(239,68,68,0.35)"
+            bg="rgba(239,68,68,0.12)"
+            onPress={() => clearCart()}
           >
-            <Text style={{ fontWeight: "900", color: "#1a1204", fontSize: 16 }}>Checkout preview (no payment in MVP)</Text>
-          </LinearGradient>
-        </View>
-      ) : null}
-      </View>
-    </View>
+            <ButtonText color="#fecaca">Clear</ButtonText>
+          </Button>
+          <Button flex={1} variant="outline" action="secondary" onPress={() => void onLogout()}>
+            <ButtonText>Log out</ButtonText>
+          </Button>
+        </HStack>
+
+        <ScrollView
+          style={scrollViewFill()}
+          showsVerticalScrollIndicator
+          contentContainerStyle={{ paddingBottom: 120 }}
+        >
+          {cart.items.length === 0 ? (
+            <VStack
+              p="$7"
+              borderRadius="$lg"
+              borderWidth={1}
+              borderColor={T.line}
+              alignItems="center"
+              space="sm"
+              bg={T.glass}
+              sx={{
+                _web: {
+                  boxShadow: "0 12px 36px rgba(0,0,0,0.35)",
+                },
+              }}
+            >
+              <Text fontSize="$4xl">🥂</Text>
+              <Text fontSize="$md" fontWeight="$bold" color="#f3f0e6">
+                Your cart is empty
+              </Text>
+              <Text fontSize="$sm" color={T.muted} textAlign="center" lineHeight="$md">
+                Browse the menu or ask the concierge to add items in one sentence.
+              </Text>
+            </VStack>
+          ) : (
+            <VStack space="sm">
+              {cart.items.map((li) => {
+                const dish = catalog.dishes.find((d) => d.id === li.dishId);
+                const unit = lineUnitPrice(catalog, li.dishId, li.selectedModifiers);
+                const lineTotal = unit * li.qty;
+                return (
+                  <VStack
+                    key={li.lineId}
+                    p="$4"
+                    borderRadius="$lg"
+                    borderWidth={1}
+                    borderColor={T.line}
+                    bg={T.glass}
+                    sx={{
+                      _web: {
+                        boxShadow: "0 10px 32px rgba(0,0,0,0.35)",
+                      },
+                    }}
+                  >
+                    <HStack justifyContent="space-between" space="md">
+                      <VStack flex={1} space="xs" minWidth={0}>
+                        <Text fontSize="$md" fontWeight="$black" color={T.text}>
+                          {dish?.name ?? li.dishId}
+                        </Text>
+                        <Text fontSize="$xs" color="rgba(255,255,255,0.45)">
+                          lineId: {li.lineId.slice(0, 8)}…
+                        </Text>
+                      </VStack>
+                      <Text fontSize="$md" fontWeight="$black" color={T.goldSoft}>
+                        {formatCatalogMoney(catalog.currency, lineTotal)}
+                      </Text>
+                    </HStack>
+
+                    <Box h={1} bg={T.line} my="$3" />
+
+                    <VStack space="xs">
+                      {(dish?.modifierGroups ?? []).map((g) => {
+                        const optId = li.selectedModifiers[g.id];
+                        const opt = g.options.find((o) => o.id === optId);
+                        return (
+                          <Text key={g.id} fontSize="$sm" color={T.muted}>
+                            {g.label}: <Text color="rgba(233,213,161,0.9)">{opt?.label ?? optId}</Text>
+                          </Text>
+                        );
+                      })}
+                    </VStack>
+
+                    <HStack justifyContent="space-between" alignItems="center" mt="$2">
+                      <HStack alignItems="center" space="md">
+                        <Pressable
+                          w={40}
+                          h={40}
+                          borderRadius="$sm"
+                          borderWidth={1}
+                          borderColor="rgba(255,255,255,0.14)"
+                          bg="rgba(0,0,0,0.25)"
+                          justifyContent="center"
+                          alignItems="center"
+                          onPress={() => setQty(li.lineId, Math.max(0, li.qty - 1))}
+                        >
+                          <Text color="#fff" fontSize="$xl" fontWeight="$black">
+                            −
+                          </Text>
+                        </Pressable>
+                        <Text fontSize="$lg" fontWeight="$black" color="#fff" minWidth={28} textAlign="center">
+                          {li.qty}
+                        </Text>
+                        <Pressable
+                          w={40}
+                          h={40}
+                          borderRadius="$sm"
+                          borderWidth={1}
+                          borderColor="rgba(212,175,101,0.55)"
+                          bg="rgba(212,175,101,0.12)"
+                          justifyContent="center"
+                          alignItems="center"
+                          onPress={() => setQty(li.lineId, li.qty + 1)}
+                        >
+                          <Text color={T.goldSoft} fontSize="$xl" fontWeight="$black">
+                            +
+                          </Text>
+                        </Pressable>
+                      </HStack>
+
+                      <Button size="sm" variant="outline" action="secondary" onPress={() => removeLine(li.lineId)}>
+                        <ButtonText>Remove</ButtonText>
+                      </Button>
+                    </HStack>
+                  </VStack>
+                );
+              })}
+            </VStack>
+          )}
+        </ScrollView>
+
+        {cart.items.length > 0 ? (
+          <Box position="absolute" left={0} right={0} bottom={84} borderRadius="$lg" overflow="hidden" h={54}>
+            <Pressable flex={1} onPress={() => router.push("/checkout")}>
+              <LinearGradient
+                colors={[T.gold, T.goldSoft, T.gold]}
+                start={{ x: 0, y: 0.5 }}
+                end={{ x: 1, y: 0.5 }}
+                style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+              >
+                <Text fontWeight="$black" color="#1a1204" fontSize="$md">
+                  Checkout preview (no payment in MVP)
+                </Text>
+              </LinearGradient>
+            </Pressable>
+          </Box>
+        ) : null}
+      </VStack>
+    </Box>
   );
 }
-
-const styles = StyleSheet.create({
-  page: { flex: 1, backgroundColor: C.bg },
-  shell: { flex: 1, width: "100%", maxWidth: 960, alignSelf: "center" },
-  kicker: { fontSize: 12, color: "rgba(233,213,161,0.85)", letterSpacing: 2, textTransform: "uppercase" },
-  title: { fontSize: 30, fontWeight: "900", color: C.text },
-  toolBtn: {
-    borderRadius: 14,
-    backgroundColor: C.glass,
-    borderWidth: 1,
-    borderColor: C.line,
-    paddingVertical: 12,
-  },
-  dangerBtn: {
-    backgroundColor: "rgba(239,68,68,0.12)",
-    borderColor: "rgba(239,68,68,0.35)",
-  },
-  empty: {
-    padding: 28,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: C.line,
-    alignItems: "center",
-    gap: 10,
-  },
-  card: {
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: C.line,
-    backgroundColor: C.glass,
-    padding: 16,
-  },
-  step: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.14)",
-    backgroundColor: "rgba(0,0,0,0.25)",
-  },
-  stepPlus: {
-    borderColor: "rgba(201,162,77,0.55)",
-    backgroundColor: "rgba(201,162,77,0.12)",
-  },
-  delBtn: {
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.12)",
-  },
-  checkoutWrap: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 84,
-    borderRadius: 18,
-    overflow: "hidden",
-    height: 54,
-  },
-  checkout: { flex: 1, alignItems: "center", justifyContent: "center" },
-});

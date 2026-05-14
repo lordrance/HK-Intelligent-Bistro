@@ -2,31 +2,41 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
-import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View, Platform } from "react-native";
+import { Platform, StyleSheet, useWindowDimensions } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  Box,
+  Button,
+  ButtonText,
+  Heading,
+  HStack,
+  Pressable,
+  ScrollView,
+  Text,
+  VStack,
+} from "@gluestack-ui/themed";
 import { useBistroStore } from "../../src/store/bistroStore";
 import { lineUnitPrice } from "../../src/lib/pricing";
 import { useAppShell } from "../../src/lib/responsive";
-
-const C = {
-  panel: "#0c0e14",
-  text: "#fdf8ef",
-  muted: "rgba(255,255,255,0.55)",
-  gold: "#c9a24d",
-  goldSoft: "#f3e7c7",
-  line: "rgba(255,255,255,0.1)",
-};
+import { scrollViewFill } from "../../src/lib/scrollStyles";
+import { formatCatalogMoney } from "../../src/lib/formatMoney";
+import { T } from "../../src/theme/tokens";
 
 export default function DishDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const shell = useAppShell();
+  const insets = useSafeAreaInsets();
   const catalog = useBistroStore((s) => s.catalog);
   const catalogLoading = useBistroStore((s) => s.catalogLoading);
   const addLine = useBistroStore((s) => s.addLineFromMenu);
-  const { height } = useWindowDimensions();
+  const { height, width } = useWindowDimensions();
 
   const dish = useMemo(() => catalog?.dishes.find((d) => d.id === id), [catalog, id]);
   const [selected, setSelected] = useState<Record<string, string>>({});
+
+  const sheetMaxW = shell.isWeb ? Math.min(560, shell.innerWidth) : width;
+  const heroW = sheetMaxW;
 
   const modifiersComplete = useMemo(() => {
     if (!dish) return false;
@@ -48,171 +58,191 @@ export default function DishDetailScreen() {
 
   if (catalogLoading) {
     return (
-      <Pressable style={styles.backdrop} onPress={() => router.back()}>
-        <View style={styles.centerBox}>
-          <Text style={{ color: "#fff" }}>Loading dish…</Text>
-          <Pressable onPress={() => router.back()} style={styles.backBtn}>
-            <Text style={{ color: C.goldSoft, fontWeight: "800" }}>Back</Text>
-          </Pressable>
-        </View>
+      <Pressable flex={1} bg="rgba(0,0,0,0.5)" onPress={() => router.back()}>
+        <VStack flex={1} justifyContent="center" alignItems="center" space="md">
+          <Text color="#fff">Loading dish…</Text>
+          <Button variant="outline" action="primary" onPress={() => router.back()}>
+            <ButtonText>Back</ButtonText>
+          </Button>
+        </VStack>
       </Pressable>
     );
   }
 
   if (!catalog) {
     return (
-      <Pressable style={styles.backdrop} onPress={() => router.back()}>
-        <View style={styles.centerBox}>
-          <Text style={{ color: "#fff" }}>Menu unavailable</Text>
-          <Text style={{ color: C.muted, marginTop: 8, textAlign: "center" }}>
+      <Pressable flex={1} bg="rgba(0,0,0,0.5)" onPress={() => router.back()}>
+        <VStack flex={1} justifyContent="center" alignItems="center" space="md" px="$6">
+          <Text color="#fff">Menu unavailable</Text>
+          <Text color={T.muted} textAlign="center">
             The catalog failed to load. Go back and tap Retry on the menu tab.
           </Text>
-          <Pressable onPress={() => router.back()} style={styles.backBtn}>
-            <Text style={{ color: C.goldSoft, fontWeight: "800" }}>Back</Text>
-          </Pressable>
-        </View>
+          <Button variant="outline" action="primary" onPress={() => router.back()}>
+            <ButtonText>Back</ButtonText>
+          </Button>
+        </VStack>
       </Pressable>
     );
   }
 
   if (!dish) {
     return (
-      <Pressable style={styles.backdrop} onPress={() => router.back()}>
-        <View style={styles.centerBox}>
-          <Text style={{ color: "#fff" }}>Dish not found</Text>
-          <Pressable onPress={() => router.back()} style={styles.backBtn}>
-            <Text style={{ color: C.goldSoft, fontWeight: "800" }}>Back</Text>
-          </Pressable>
-        </View>
+      <Pressable flex={1} bg="rgba(0,0,0,0.5)" onPress={() => router.back()}>
+        <VStack flex={1} justifyContent="center" alignItems="center" space="md">
+          <Text color="#fff">Dish not found</Text>
+          <Button variant="outline" action="primary" onPress={() => router.back()}>
+            <ButtonText>Back</ButtonText>
+          </Button>
+        </VStack>
       </Pressable>
     );
   }
 
   const unit = lineUnitPrice(catalog, dish.id, selected);
+  const bottomPad = Math.max(insets.bottom, 16) + 8;
 
   return (
-    <Pressable style={styles.backdrop} onPress={() => router.back()}>
-      <View style={{ flex: 1, justifyContent: "flex-end" }}>
+    <Pressable flex={1} bg="rgba(0,0,0,0.5)" onPress={() => router.back()}>
+      <Box flex={1} justifyContent="flex-end">
         <Pressable onPress={(e) => e.stopPropagation()}>
-          <View
-            style={[
-              styles.sheet,
-              { maxHeight: height * 0.88 },
-              shell.isWeb ? { maxWidth: 560, width: "100%", alignSelf: "center", marginBottom: Platform.OS === "web" ? 24 : 0 } : null,
-            ]}
+          <Box
+            maxHeight={height * 0.88}
+            w={shell.isWeb ? "100%" : "100%"}
+            maxWidth={shell.isWeb ? 560 : undefined}
+            alignSelf={shell.isWeb ? "center" : "stretch"}
+            mb={Platform.OS === "web" ? "$6" : 0}
+            borderTopLeftRadius={T.radii.sheet}
+            borderTopRightRadius={T.radii.sheet}
+            overflow="hidden"
+            borderWidth={1}
+            borderColor="rgba(212,175,101,0.35)"
+            bg={T.panel}
           >
-            <LinearGradient colors={["#161a24", C.panel]} style={StyleSheet.absoluteFill} />
-            <ScrollView showsVerticalScrollIndicator={false}>
-              <View style={{ height: 220, width: "100%" }}>
-                <Image source={{ uri: dish.imageUrl ?? "" }} style={{ width: "100%", height: "100%" }} contentFit="cover" />
+            <LinearGradient colors={["#161a24", T.panel]} style={StyleSheet.absoluteFill} />
+
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Close"
+              position="absolute"
+              zIndex={10}
+              w={40}
+              h={40}
+              borderRadius="$full"
+              top={Math.max(12, insets.top)}
+              right={12}
+              bg="rgba(8,10,16,0.72)"
+              borderWidth={1}
+              borderColor="rgba(255,255,255,0.18)"
+              justifyContent="center"
+              alignItems="center"
+              onPress={() => router.back()}
+            >
+              <Text color="#f3f0e6" fontSize="$lg" fontWeight="$bold" lineHeight={20}>
+                ✕
+              </Text>
+            </Pressable>
+
+            <ScrollView
+              style={[scrollViewFill(), { maxHeight: height * 0.88 }]}
+              showsVerticalScrollIndicator
+              contentContainerStyle={{ paddingBottom: bottomPad }}
+            >
+              <Box w={heroW} h={220} alignSelf="center" bg="rgba(0,0,0,0.35)">
+                <Image
+                  source={{ uri: dish.imageUrl ?? "" }}
+                  style={{ width: heroW, height: 220 }}
+                  contentFit="cover"
+                  transition={200}
+                />
                 <LinearGradient
-                  colors={["transparent", C.panel]}
+                  colors={["transparent", T.panel]}
                   style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 120 }}
                 />
-              </View>
+              </Box>
 
-              <View style={{ padding: 20, gap: 16 }}>
-                <View style={{ flexDirection: "row", justifyContent: "space-between", gap: 12 }}>
-                  <View style={{ flex: 1, gap: 6 }}>
-                    <Text style={{ fontSize: 12, color: "rgba(233,213,161,0.85)" }}>{dish.category}</Text>
-                    <Text style={{ fontSize: 26, fontWeight: "900", color: C.text }}>{dish.name}</Text>
-                    <Text style={{ fontSize: 14, color: C.muted, lineHeight: 20 }}>{dish.description}</Text>
-                  </View>
-                  <View style={{ alignItems: "flex-end", gap: 4 }}>
-                    <Text style={{ fontSize: 12, color: "rgba(255,255,255,0.45)" }}>Unit preview</Text>
-                    <Text style={{ fontSize: 22, fontWeight: "900", color: C.goldSoft }}>
-                      {catalog.currency} {unit}
+              <VStack p="$6" space="md">
+                <HStack justifyContent="space-between" space="md">
+                  <VStack flex={1} space="xs" minWidth={0}>
+                    <Text fontSize="$xs" color={T.goldDim}>
+                      {dish.category}
                     </Text>
-                  </View>
-                </View>
+                    <Heading size="xl" fontWeight="$black" color={T.text}>
+                      {dish.name}
+                    </Heading>
+                    <Text fontSize="$sm" color={T.muted} lineHeight="$md">
+                      {dish.description}
+                    </Text>
+                  </VStack>
+                  <VStack alignItems="flex-end" space="xs">
+                    <Text fontSize="$xs" color="rgba(255,255,255,0.45)">
+                      Unit preview
+                    </Text>
+                    <Text fontSize="$2xl" fontWeight="$black" color={T.goldSoft}>
+                      {formatCatalogMoney(catalog.currency, unit)}
+                    </Text>
+                  </VStack>
+                </HStack>
 
-                <View style={{ height: 1, backgroundColor: "rgba(255,255,255,0.08)" }} />
+                <Box h={1} bg="rgba(255,255,255,0.08)" />
 
                 {(dish.modifierGroups ?? []).map((g) => (
-                  <View key={g.id} style={{ gap: 10 }}>
-                    <Text style={{ fontSize: 15, fontWeight: "800", color: "#f3f0e6" }}>
+                  <VStack key={g.id} space="sm">
+                    <Text fontSize="$md" fontWeight="$bold" color="#f3f0e6">
                       {g.label}
-                      {g.required ? <Text style={{ color: C.gold }}> *</Text> : null}
+                      {g.required ? <Text color={T.gold}> *</Text> : null}
                     </Text>
-                    <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
+                    <Box flexDirection="row" flexWrap="wrap" style={{ gap: 10 }}>
                       {g.options.map((o) => {
                         const active = selected[g.id] === o.id;
                         return (
                           <Pressable key={o.id} onPress={() => setSelected((prev) => ({ ...prev, [g.id]: o.id }))}>
-                            <View
-                              style={{
-                                paddingHorizontal: 14,
-                                paddingVertical: 10,
-                                borderRadius: 14,
-                                borderWidth: 1,
-                                borderColor: active ? "rgba(201,162,77,0.85)" : C.line,
-                                backgroundColor: active ? "rgba(201,162,77,0.12)" : "rgba(255,255,255,0.04)",
-                              }}
+                            <Box
+                              px="$3.5"
+                              py="$2.5"
+                              borderRadius="$md"
+                              borderWidth={1}
+                              borderColor={active ? "rgba(212,175,101,0.85)" : T.line}
+                              bg={active ? "rgba(212,175,101,0.12)" : T.glass}
                             >
-                              <Text style={{ color: active ? C.goldSoft : "rgba(255,255,255,0.75)", fontWeight: "700" }}>
+                              <Text color={active ? T.goldSoft : "rgba(255,255,255,0.75)"} fontWeight="$bold">
                                 {o.label}
                               </Text>
                               {o.priceDelta ? (
-                                <Text style={{ fontSize: 12, color: "rgba(233,213,161,0.75)", marginTop: 2 }}>
-                                  +{catalog.currency} {o.priceDelta}
+                                <Text fontSize="$xs" color="rgba(233,213,161,0.75)" mt="$0.5">
+                                  +{formatCatalogMoney(catalog.currency, o.priceDelta)}
                                 </Text>
                               ) : null}
-                            </View>
+                            </Box>
                           </Pressable>
                         );
                       })}
-                    </View>
-                  </View>
+                    </Box>
+                  </VStack>
                 ))}
 
-                <Pressable
+                <Button
+                  mt="$2"
+                  action="primary"
+                  isDisabled={!modifiersComplete}
+                  opacity={modifiersComplete ? 1 : 0.45}
                   onPress={() => {
                     if (!modifiersComplete) return;
                     addLine({ dishId: dish.id, qty: 1, selectedModifiers: selected });
                     router.back();
                   }}
-                  disabled={!modifiersComplete}
-                  style={{ marginTop: 8, opacity: modifiersComplete ? 1 : 0.45 }}
                 >
-                  <LinearGradient
-                    colors={[C.gold, C.goldSoft, C.gold]}
-                    start={{ x: 0, y: 0.5 }}
-                    end={{ x: 1, y: 0.5 }}
-                    style={{ borderRadius: 16, paddingVertical: 14, alignItems: "center" }}
-                  >
-                    <Text style={{ color: "#1a1204", fontWeight: "900", fontSize: 16 }}>
-                      Add to cart · {catalog.currency} {unit}
-                    </Text>
-                  </LinearGradient>
-                </Pressable>
-                <Text style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", textAlign: "center" }}>
+                  <ButtonText>
+                    Add to cart · {formatCatalogMoney(catalog.currency, unit)}
+                  </ButtonText>
+                </Button>
+                <Text fontSize={11} color="rgba(255,255,255,0.35)" textAlign="center">
                   You can refine this later in the cart or with the concierge.
                 </Text>
-              </View>
+              </VStack>
             </ScrollView>
-          </View>
+          </Box>
         </Pressable>
-      </View>
+      </Box>
     </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  backdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.45)" },
-  sheet: {
-    borderTopLeftRadius: 26,
-    borderTopRightRadius: 26,
-    overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "rgba(201,162,77,0.35)",
-    backgroundColor: "#0c0e14",
-  },
-  centerBox: { flex: 1, justifyContent: "center", alignItems: "center", gap: 16 },
-  backBtn: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.2)",
-  },
-});

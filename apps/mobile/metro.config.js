@@ -8,7 +8,8 @@ const config = getDefaultConfig(projectRoot);
 
 config.watchFolders = [workspaceRoot];
 
-config.resolver.disableHierarchicalLookup = true;
+// Allow Metro to walk nested deps (pnpm .pnpm layout + Gluestack peer imports).
+config.resolver.disableHierarchicalLookup = false;
 config.resolver.nodeModulesPaths = [
   path.resolve(projectRoot, "node_modules"),
   path.resolve(workspaceRoot, "node_modules"),
