@@ -9,7 +9,7 @@ import {
 } from "@hk/shared";
 import { loadCatalog } from "./catalog.js";
 import { searchDishes } from "./search.js";
-import { cartLineIdSet, validateCartActions } from "./validateActions.js";
+import { validateCartActions } from "./validateActions.js";
 
 function env(name: string, fallback?: string) {
   const v = process.env[name] ?? fallback;
@@ -158,8 +158,7 @@ export async function handleAssistantIntent(body: unknown): Promise<AssistantInt
     return { ...base, cart_actions: [] };
   }
 
-  const lineIds = cartLineIdSet(input.cart);
-  const v = validateCartActions(catalog, lineIds, base.cart_actions);
+  const v = validateCartActions(catalog, input.cart, base.cart_actions);
   if (!v.ok) {
     return {
       assistant_message: `${base.assistant_message}\n\n(Note: I cannot apply cart changes because validation failed: ${v.reason})`,

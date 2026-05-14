@@ -28,6 +28,14 @@ export default function DishDetailScreen() {
   const dish = useMemo(() => catalog?.dishes.find((d) => d.id === id), [catalog, id]);
   const [selected, setSelected] = useState<Record<string, string>>({});
 
+  const modifiersComplete = useMemo(() => {
+    if (!dish) return false;
+    for (const g of dish.modifierGroups ?? []) {
+      if (g.required && !selected[g.id]) return false;
+    }
+    return true;
+  }, [dish, selected]);
+
   useEffect(() => {
     if (!dish) return;
     const m: Record<string, string> = {};
@@ -159,10 +167,12 @@ export default function DishDetailScreen() {
 
                 <Pressable
                   onPress={() => {
+                    if (!modifiersComplete) return;
                     addLine({ dishId: dish.id, qty: 1, selectedModifiers: selected });
                     router.back();
                   }}
-                  style={{ marginTop: 8 }}
+                  disabled={!modifiersComplete}
+                  style={{ marginTop: 8, opacity: modifiersComplete ? 1 : 0.45 }}
                 >
                   <LinearGradient
                     colors={[C.gold, C.goldSoft, C.gold]}

@@ -33,6 +33,7 @@ export const useBistroStore = create<{
   messages: ChatMessage[];
   pending: Pending | null;
   undoStack: Cart[];
+  assistantInFlight: boolean;
 
   loadCatalog: (baseUrl: string) => Promise<void>;
   addLineFromMenu: (params: { dishId: string; qty: number; selectedModifiers: Record<string, string> }) => void;
@@ -50,6 +51,7 @@ export const useBistroStore = create<{
   messages: [],
   pending: null,
   undoStack: [],
+  assistantInFlight: false,
 
   loadCatalog: async (baseUrl) => {
     set({ catalogLoading: true });
@@ -92,131 +94,153 @@ export const useBistroStore = create<{
     if (!cat) return;
 
     const userMsg: ChatMessage = { role: "user", content: text };
-    set((s) => ({ messages: [...s.messages, userMsg] }));
 
-    let json: AssistantIntentResponse;
-    try {
-      const res = await fetch(`${baseUrl}/assistant/intent`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userText: text,
-          messages: get().messages.map((m) => ({ role: m.role, content: m.content })),
-          cart: get().cart,
-          catalogVersion: cat.version,
-        }),
-      });
-
-      let body: unknown;
-      try {
-        body = await res.json();
-      } catch {
-        body = null;
-      }
-
-      if (!res.ok) {
-        const errMsg =
-          body &&
-          typeof body === "object" &&
-          "error" in body &&
-          typeof (body as { error: unknown }).error === "string"
-            ? `Request failed (${res.status}): ${(body as { error: string }).error}`
-            : `Request failed (${res.status}). Please try again.`;
-        set((s) => ({
-          messages: [...s.messages, { role: "assistant", content: errMsg }],
-          pending: null,
-        }));
-        return;
-      }
-
-      const parsed = AssistantIntentResponseSchema.safeParse(body);
-      if (!parsed.success) {
-        set((s) => ({
-          messages: [
-            ...s.messages,
-            {
-              role: "assistant",
-              content: "The server returned an unexpected response. Please try again.",
-            },
-          ],
-          pending: null,
-        }));
-        return;
-      }
-      json = parsed.data;
-    } catch {
+    if (get().assistantInFlight) {
       set((s) => ({
         messages: [
           ...s.messages,
+          userMsg,
           {
             role: "assistant",
-            content:
-              "Network error. Check your connection and that EXPO_PUBLIC_API_BASE_URL points to the running API.",
+            content: "Please wait for the previous concierge reply to finish before sending another message.",
           },
         ],
-        pending: null,
       }));
-      return;
-    }
-
-    const clarify = json.needs_clarification;
-    if (clarify) {
-      const extra = clarify.options?.length
-        ? "\n\n" + clarify.options.map((o) => `• ${o.label}`).join("\n")
-        : "";
-      set((s) => ({
-        messages: [
-          ...s.messages,
-          {
-            role: "assistant",
-            content: `${json.assistant_message}\n\n${clarify.question}${extra}`,
-          },
-        ],
-        pending: null,
-      }));
-      return;
-    }
-
-    if (!json.cart_actions.length) {
-      set((s) => ({
-        messages: [...s.messages, { role: "assistant", content: json.assistant_message }],
-        pending: null,
-      }));
-      return;
-    }
-
-    if (isAutoApply(json)) {
-      const r = applyCartActions(get().cart, json.cart_actions);
-      if (r.ok) {
-        set((s) => ({
-          undoStack: [...s.undoStack, s.cart].slice(-12),
-          cart: r.cart,
-          messages: [...s.messages, { role: "assistant", content: json.assistant_message }],
-          pending: null,
-        }));
-      } else {
-        set((s) => ({
-          messages: [
-            ...s.messages,
-            {
-              role: "assistant",
-              content: `${json.assistant_message}\n\n(Auto-apply failed: ${r.error})`,
-            },
-          ],
-          pending: null,
-        }));
-      }
       return;
     }
 
     set((s) => ({
-      messages: [...s.messages, { role: "assistant", content: json.assistant_message }],
-      pending: {
-        actions: json.cart_actions,
-        assistant_message: json.assistant_message,
-        confidence: json.confidence,
-      },
+      messages: [...s.messages, userMsg],
+      assistantInFlight: true,
     }));
+
+    let json: AssistantIntentResponse;
+    try {
+      try {
+        const res = await fetch(`${baseUrl}/assistant/intent`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userText: text,
+            messages: get().messages.map((m) => ({ role: m.role, content: m.content })),
+            cart: get().cart,
+            catalogVersion: cat.version,
+          }),
+        });
+
+        let body: unknown;
+        try {
+          body = await res.json();
+        } catch {
+          body = null;
+        }
+
+        if (!res.ok) {
+          const errMsg =
+            body &&
+            typeof body === "object" &&
+            "error" in body &&
+            typeof (body as { error: unknown }).error === "string"
+              ? `Request failed (${res.status}): ${(body as { error: string }).error}`
+              : `Request failed (${res.status}). Please try again.`;
+          set((s) => ({
+            messages: [...s.messages, { role: "assistant", content: errMsg }],
+            pending: null,
+          }));
+          return;
+        }
+
+        const parsed = AssistantIntentResponseSchema.safeParse(body);
+        if (!parsed.success) {
+          set((s) => ({
+            messages: [
+              ...s.messages,
+              {
+                role: "assistant",
+                content: "The server returned an unexpected response. Please try again.",
+              },
+            ],
+            pending: null,
+          }));
+          return;
+        }
+        json = parsed.data;
+      } catch {
+        set((s) => ({
+          messages: [
+            ...s.messages,
+            {
+              role: "assistant",
+              content:
+                "Network error. Check your connection and that EXPO_PUBLIC_API_BASE_URL points to the running API.",
+            },
+          ],
+          pending: null,
+        }));
+        return;
+      }
+
+      const clarify = json.needs_clarification;
+      if (clarify) {
+        const extra = clarify.options?.length
+          ? "\n\n" + clarify.options.map((o) => `• ${o.label}`).join("\n")
+          : "";
+        set((s) => ({
+          messages: [
+            ...s.messages,
+            {
+              role: "assistant",
+              content: `${json.assistant_message}\n\n${clarify.question}${extra}`,
+            },
+          ],
+          pending: null,
+        }));
+        return;
+      }
+
+      if (!json.cart_actions.length) {
+        set((s) => ({
+          messages: [...s.messages, { role: "assistant", content: json.assistant_message }],
+          pending: null,
+        }));
+        return;
+      }
+
+      if (isAutoApply(json)) {
+        const r = applyCartActions(get().cart, json.cart_actions);
+        if (r.ok) {
+          set((s) => ({
+            undoStack: [...s.undoStack, s.cart].slice(-12),
+            cart: r.cart,
+            messages: [...s.messages, { role: "assistant", content: json.assistant_message }],
+            pending: null,
+          }));
+        } else {
+          set((s) => ({
+            messages: [
+              ...s.messages,
+              {
+                role: "assistant",
+                content: `${json.assistant_message}\n\n(Auto-apply failed: ${r.error})`,
+              },
+            ],
+            pending: null,
+          }));
+        }
+        return;
+      }
+
+      set((s) => ({
+        messages: [...s.messages, { role: "assistant", content: json.assistant_message }],
+        pending: {
+          actions: json.cart_actions,
+          assistant_message: json.assistant_message,
+          confidence: json.confidence,
+        },
+      }));
+    } finally {
+      set({ assistantInFlight: false });
+    }
   },
 
   confirmPending: () => {

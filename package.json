@@ -7,7 +7,7 @@
     "dev:mobile": "pnpm --filter @hk/mobile start",
     "build:shared": "pnpm --filter @hk/shared build",
     "build:server": "pnpm --filter @hk/server build",
-    "test": "pnpm --filter @hk/shared test",
+    "test": "pnpm --filter @hk/shared test && pnpm --filter @hk/server test",
     "typecheck": "pnpm --filter @hk/shared build && pnpm --filter @hk/server exec tsc --noEmit && pnpm --filter @hk/mobile exec tsc --noEmit",
     "ci": "pnpm test && pnpm typecheck"
   }
