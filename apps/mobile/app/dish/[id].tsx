@@ -2,9 +2,10 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
-import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View, Platform } from "react-native";
 import { useBistroStore } from "../../src/store/bistroStore";
 import { lineUnitPrice } from "../../src/lib/pricing";
+import { useAppShell } from "../../src/lib/responsive";
 
 const C = {
   panel: "#0c0e14",
@@ -18,6 +19,7 @@ const C = {
 export default function DishDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const shell = useAppShell();
   const catalog = useBistroStore((s) => s.catalog);
   const addLine = useBistroStore((s) => s.addLineFromMenu);
   const { height } = useWindowDimensions();
@@ -54,7 +56,13 @@ export default function DishDetailScreen() {
     <Pressable style={styles.backdrop} onPress={() => router.back()}>
       <View style={{ flex: 1, justifyContent: "flex-end" }}>
         <Pressable onPress={(e) => e.stopPropagation()}>
-          <View style={[styles.sheet, { maxHeight: height * 0.88 }]}>
+          <View
+            style={[
+              styles.sheet,
+              { maxHeight: height * 0.88 },
+              shell.isWeb ? { maxWidth: 560, width: "100%", alignSelf: "center", marginBottom: Platform.OS === "web" ? 24 : 0 } : null,
+            ]}
+          >
             <LinearGradient colors={["#161a24", C.panel]} style={StyleSheet.absoluteFill} />
             <ScrollView showsVerticalScrollIndicator={false}>
               <View style={{ height: 220, width: "100%" }}>

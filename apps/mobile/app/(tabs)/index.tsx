@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { useBistroStore } from "../../src/store/bistroStore";
 import type { Dish } from "@hk/shared";
+import { useAppShell } from "../../src/lib/responsive";
 
 const C = {
   bg: "#07080b",
@@ -29,6 +30,7 @@ function GlassCard({ children }: { children: ReactNode }) {
 
 export default function MenuScreen() {
   const router = useRouter();
+  const shell = useAppShell();
   const catalog = useBistroStore((s) => s.catalog);
   const loading = useBistroStore((s) => s.catalogLoading);
   const [q, setQ] = useState("");
@@ -57,22 +59,25 @@ export default function MenuScreen() {
 
   if (loading || !catalog) {
     return (
-      <View style={[styles.page, { paddingTop: 56 }]}>
-        <Text style={styles.hero}>Intelligent Bistro</Text>
-        <Text style={styles.sub}>Preparing the menu…</Text>
+      <View style={[styles.page, { paddingTop: 56, paddingHorizontal: shell.pagePadding }]}>
+        <View style={styles.shell}>
+          <Text style={styles.hero}>Intelligent Bistro</Text>
+          <Text style={styles.sub}>Preparing the menu…</Text>
+        </View>
       </View>
     );
   }
 
   return (
-    <View style={[styles.page, { paddingTop: 52 }]}>
-      <View style={{ gap: 6, marginBottom: 14 }}>
-        <Text style={styles.kicker}>Hong Kong · Bistro</Text>
-        <Text style={styles.title}>What are we craving tonight?</Text>
-        <Text style={styles.sub}>
-          Tap a card to choose options, or open Concierge to steer the cart with natural language.
-        </Text>
-      </View>
+    <View style={[styles.page, { paddingTop: 52, paddingHorizontal: shell.pagePadding }]}>
+      <View style={styles.shell}>
+        <View style={{ gap: 6, marginBottom: 14 }}>
+          <Text style={styles.kicker}>Hong Kong · Bistro</Text>
+          <Text style={styles.title}>What are we craving tonight?</Text>
+          <Text style={styles.sub}>
+            Tap a card to choose options, or open Concierge to steer the cart with natural language.
+          </Text>
+        </View>
 
       <GlassCard>
         <View style={styles.searchRow}>
@@ -100,61 +105,76 @@ export default function MenuScreen() {
               <Text style={styles.catTitle}>{category}</Text>
             </View>
 
-            {dishes.map((dish) => (
-              <Pressable key={dish.id} onPress={() => router.push(`/dish/${dish.id}`)}>
-                <GlassCard>
-                  <View>
-                    <View style={{ height: 148, borderTopLeftRadius: 18, borderTopRightRadius: 18, overflow: "hidden" }}>
-                      <Image
-                        source={{ uri: dish.imageUrl ?? "" }}
-                        style={{ width: "100%", height: "100%" }}
-                        contentFit="cover"
-                      />
-                      <LinearGradient
-                        colors={["transparent", "rgba(5,6,10,0.92)"]}
-                        style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 88 }}
-                      />
-                      <View
-                        style={{
-                          position: "absolute",
-                          left: 14,
-                          right: 14,
-                          bottom: 12,
-                          flexDirection: "row",
-                          justifyContent: "space-between",
-                          gap: 12,
-                        }}
-                      >
-                        <Text style={{ flex: 1, fontSize: 18, fontWeight: "800", color: "#fff" }} numberOfLines={2}>
-                          {dish.name}
+            <View
+              style={{
+                flexDirection: "row",
+                flexWrap: "wrap",
+                gap: shell.columnGap,
+                width: "100%",
+              }}
+            >
+              {dishes.map((dish) => (
+                <Pressable
+                  key={dish.id}
+                  style={{ width: shell.cardWidth, marginBottom: 14 }}
+                  onPress={() => router.push(`/dish/${dish.id}`)}
+                >
+                  <GlassCard>
+                    <View>
+                      <View style={{ height: 148, borderTopLeftRadius: 18, borderTopRightRadius: 18, overflow: "hidden" }}>
+                        <Image
+                          source={{ uri: dish.imageUrl ?? "" }}
+                          style={{ width: "100%", height: "100%" }}
+                          contentFit="cover"
+                        />
+                        <LinearGradient
+                          colors={["transparent", "rgba(5,6,10,0.92)"]}
+                          style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 88 }}
+                        />
+                        <View
+                          style={{
+                            position: "absolute",
+                            left: 14,
+                            right: 14,
+                            bottom: 12,
+                            flexDirection: "row",
+                            justifyContent: "space-between",
+                            gap: 12,
+                          }}
+                        >
+                          <Text style={{ flex: 1, fontSize: 18, fontWeight: "800", color: "#fff" }} numberOfLines={2}>
+                            {dish.name}
+                          </Text>
+                          <Text style={{ fontSize: 16, fontWeight: "800", color: C.goldSoft }}>
+                            {catalog.currency} {dish.basePrice}
+                          </Text>
+                        </View>
+                      </View>
+                      <View style={{ padding: 14, gap: 8 }}>
+                        <Text style={{ fontSize: 13, color: C.muted }} numberOfLines={2}>
+                          {dish.description}
                         </Text>
-                        <Text style={{ fontSize: 16, fontWeight: "800", color: C.goldSoft }}>
-                          {catalog.currency} {dish.basePrice}
-                        </Text>
+                        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+                          <Text style={{ fontSize: 12, color: "rgba(233,213,161,0.75)" }}>Tap to customize</Text>
+                          <Text style={{ fontSize: 20, color: C.gold }}>→</Text>
+                        </View>
                       </View>
                     </View>
-                    <View style={{ padding: 14, gap: 8 }}>
-                      <Text style={{ fontSize: 13, color: C.muted }} numberOfLines={2}>
-                        {dish.description}
-                      </Text>
-                      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-                        <Text style={{ fontSize: 12, color: "rgba(233,213,161,0.75)" }}>Tap to customize</Text>
-                        <Text style={{ fontSize: 20, color: C.gold }}>→</Text>
-                      </View>
-                    </View>
-                  </View>
-                </GlassCard>
-              </Pressable>
-            ))}
+                  </GlassCard>
+                </Pressable>
+              ))}
+            </View>
           </View>
         ))}
       </ScrollView>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  page: { flex: 1, paddingHorizontal: 18, backgroundColor: C.bg },
+  page: { flex: 1, backgroundColor: C.bg },
+  shell: { width: "100%", maxWidth: 960, alignSelf: "center" },
   hero: { fontSize: 28, fontWeight: "800", color: C.text },
   title: { fontSize: 30, fontWeight: "900", color: C.text, letterSpacing: -0.5 },
   kicker: { fontSize: 12, color: "rgba(233,213,161,0.85)", letterSpacing: 2 },
@@ -166,7 +186,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: C.line,
     backgroundColor: C.glass,
-    marginBottom: 14,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 12 },
     shadowOpacity: 0.35,

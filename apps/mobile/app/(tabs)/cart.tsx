@@ -2,6 +2,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useBistroStore } from "../../src/store/bistroStore";
 import { cartTotal, lineUnitPrice } from "../../src/lib/pricing";
+import { useAppShell } from "../../src/lib/responsive";
 
 const C = {
   bg: "#07080b",
@@ -14,6 +15,7 @@ const C = {
 };
 
 export default function CartScreen() {
+  const shell = useAppShell();
   const catalog = useBistroStore((s) => s.catalog);
   const cart = useBistroStore((s) => s.cart);
   const setQty = useBistroStore((s) => s.setLineQty);
@@ -23,8 +25,10 @@ export default function CartScreen() {
 
   if (!catalog) {
     return (
-      <View style={[styles.page, { paddingTop: 56 }]}>
-        <Text style={{ color: C.muted }}>Loading cart…</Text>
+      <View style={[styles.page, { paddingTop: 56, paddingHorizontal: shell.pagePadding }]}>
+        <View style={styles.shell}>
+          <Text style={{ color: C.muted }}>Loading cart…</Text>
+        </View>
       </View>
     );
   }
@@ -32,8 +36,9 @@ export default function CartScreen() {
   const total = cartTotal(catalog, cart);
 
   return (
-    <View style={[styles.page, { paddingTop: 52 }]}>
-      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 14 }}>
+    <View style={[styles.page, { paddingTop: 52, paddingHorizontal: shell.pagePadding }]}>
+      <View style={styles.shell}>
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 14 }}>
         <View style={{ gap: 6 }}>
           <Text style={styles.kicker}>Your order</Text>
           <Text style={styles.title}>Cart</Text>
@@ -134,12 +139,14 @@ export default function CartScreen() {
           </LinearGradient>
         </View>
       ) : null}
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  page: { flex: 1, paddingHorizontal: 18, backgroundColor: C.bg },
+  page: { flex: 1, backgroundColor: C.bg },
+  shell: { flex: 1, width: "100%", maxWidth: 960, alignSelf: "center" },
   kicker: { fontSize: 12, color: "rgba(233,213,161,0.85)", letterSpacing: 2, textTransform: "uppercase" },
   title: { fontSize: 30, fontWeight: "900", color: C.text },
   toolBtn: {
@@ -191,8 +198,8 @@ const styles = StyleSheet.create({
   },
   checkoutWrap: {
     position: "absolute",
-    left: 18,
-    right: 18,
+    left: 0,
+    right: 0,
     bottom: 84,
     borderRadius: 18,
     overflow: "hidden",

@@ -41,13 +41,26 @@ pnpm dev:mobile
 - **UI language**: All user-facing copy in the app and seed catalog is **English**. The concierge prompt asks the model to reply in English.
 - **UI stack**: React Native primitives + `StyleSheet` + `expo-linear-gradient` for a polished dark “bistro” look (Tamagui was deferred due to TS friction in the RC we tried).
 
-## Tests
+## Tests & CI
 
 ```bash
 pnpm test
+pnpm typecheck   # builds @hk/shared, then runs tsc for server + mobile
 ```
 
-- **Catalog**: The API reads `apps/server/data/catalog.json` on each request (no stale in-memory cache after edits).
+GitHub Actions (`.github/workflows/ci.yml`) runs on push/PR to `main` and `cursor/**` branches: install, shared build, unit tests, and TypeScript checks.
+
+## Catalog
+
+The API reads `apps/server/data/catalog.json` on each request (no stale in-memory cache after edits).
+
+## Web layout
+
+With `expo start --web`, shell content is centered up to **960px**; the menu uses **two columns** on wide viewports. The dish sheet modal caps at **560px** width.
+
+## Concierge pending panel
+
+Pending actions show **human-readable dish names and modifier labels** via `formatCartActionSummary` in `@hk/shared` (`packages/shared/src/cart/format-action-summary.ts`).
 
 ## Roadmap
 
