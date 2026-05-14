@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import {
   applyCartActions,
+  AssistantIntentResponseSchema,
+  CatalogSchema,
   type AssistantIntentResponse,
   type Cart,
   type CartAction,
@@ -53,10 +55,13 @@ export const useBistroStore = create<{
     set({ catalogLoading: true });
     try {
       const res = await fetch(`${baseUrl}/catalog`);
-      const data = (await res.json()) as Catalog;
-      set({ catalog: data, catalogLoading: false });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const raw: unknown = await res.json();
+      const parsed = CatalogSchema.safeParse(raw);
+      if (!parsed.success) throw new Error("invalid_catalog_shape");
+      set({ catalog: parsed.data, catalogLoading: false });
     } catch {
-      set({ catalogLoading: false });
+      set({ catalog: null, catalogLoading: false });
     }
   },
 
@@ -89,18 +94,70 @@ export const useBistroStore = create<{
     const userMsg: ChatMessage = { role: "user", content: text };
     set((s) => ({ messages: [...s.messages, userMsg] }));
 
-    const res = await fetch(`${baseUrl}/assistant/intent`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        userText: text,
-        messages: get().messages.map((m) => ({ role: m.role, content: m.content })),
-        cart: get().cart,
-        catalogVersion: cat.version,
-      }),
-    });
+    let json: AssistantIntentResponse;
+    try {
+      const res = await fetch(`${baseUrl}/assistant/intent`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userText: text,
+          messages: get().messages.map((m) => ({ role: m.role, content: m.content })),
+          cart: get().cart,
+          catalogVersion: cat.version,
+        }),
+      });
 
-    const json = (await res.json()) as AssistantIntentResponse;
+      let body: unknown;
+      try {
+        body = await res.json();
+      } catch {
+        body = null;
+      }
+
+      if (!res.ok) {
+        const errMsg =
+          body &&
+          typeof body === "object" &&
+          "error" in body &&
+          typeof (body as { error: unknown }).error === "string"
+            ? `Request failed (${res.status}): ${(body as { error: string }).error}`
+            : `Request failed (${res.status}). Please try again.`;
+        set((s) => ({
+          messages: [...s.messages, { role: "assistant", content: errMsg }],
+          pending: null,
+        }));
+        return;
+      }
+
+      const parsed = AssistantIntentResponseSchema.safeParse(body);
+      if (!parsed.success) {
+        set((s) => ({
+          messages: [
+            ...s.messages,
+            {
+              role: "assistant",
+              content: "The server returned an unexpected response. Please try again.",
+            },
+          ],
+          pending: null,
+        }));
+        return;
+      }
+      json = parsed.data;
+    } catch {
+      set((s) => ({
+        messages: [
+          ...s.messages,
+          {
+            role: "assistant",
+            content:
+              "Network error. Check your connection and that EXPO_PUBLIC_API_BASE_URL points to the running API.",
+          },
+        ],
+        pending: null,
+      }));
+      return;
+    }
 
     const clarify = json.needs_clarification;
     if (clarify) {
@@ -166,7 +223,19 @@ export const useBistroStore = create<{
     const p = get().pending;
     if (!p) return;
     const r = applyCartActions(get().cart, p.actions);
-    if (!r.ok) return;
+    if (!r.ok) {
+      set((s) => ({
+        messages: [
+          ...s.messages,
+          {
+            role: "assistant",
+            content: `Could not apply pending changes: ${r.error}. The pending panel was cleared.`,
+          },
+        ],
+        pending: null,
+      }));
+      return;
+    }
     set((s) => ({
       undoStack: [...s.undoStack, s.cart].slice(-12),
       cart: r.cart,
