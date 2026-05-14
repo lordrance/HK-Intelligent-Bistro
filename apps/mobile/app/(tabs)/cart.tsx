@@ -24,7 +24,7 @@ export default function CartScreen() {
   if (!catalog) {
     return (
       <View style={[styles.page, { paddingTop: 56 }]}>
-        <Text style={{ color: C.muted }}>购物车加载中…</Text>
+        <Text style={{ color: C.muted }}>Loading cart…</Text>
       </View>
     );
   }
@@ -35,11 +35,11 @@ export default function CartScreen() {
     <View style={[styles.page, { paddingTop: 52 }]}>
       <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 14 }}>
         <View style={{ gap: 6 }}>
-          <Text style={styles.kicker}>Your Order</Text>
-          <Text style={styles.title}>购物车</Text>
+          <Text style={styles.kicker}>Your order</Text>
+          <Text style={styles.title}>Cart</Text>
         </View>
         <View style={{ alignItems: "flex-end", gap: 4 }}>
-          <Text style={{ fontSize: 12, color: "rgba(255,255,255,0.45)" }}>合计</Text>
+          <Text style={{ fontSize: 12, color: "rgba(255,255,255,0.45)" }}>Total</Text>
           <Text style={{ fontSize: 24, fontWeight: "900", color: C.goldSoft }}>
             {catalog.currency} {total}
           </Text>
@@ -48,10 +48,10 @@ export default function CartScreen() {
 
       <View style={{ flexDirection: "row", gap: 10, marginBottom: 14 }}>
         <Pressable style={[styles.toolBtn, { flex: 1 }]} onPress={() => undo()}>
-          <Text style={{ color: "#f3f0e6", fontWeight: "800", textAlign: "center" }}>撤销上一步</Text>
+          <Text style={{ color: "#f3f0e6", fontWeight: "800", textAlign: "center" }}>Undo</Text>
         </Pressable>
         <Pressable style={[styles.toolBtn, styles.dangerBtn]} onPress={() => clearCart()}>
-          <Text style={{ color: "#fecaca", fontWeight: "800", textAlign: "center" }}>清空</Text>
+          <Text style={{ color: "#fecaca", fontWeight: "800", textAlign: "center" }}>Clear</Text>
         </Pressable>
       </View>
 
@@ -59,9 +59,9 @@ export default function CartScreen() {
         {cart.items.length === 0 ? (
           <View style={styles.empty}>
             <Text style={{ fontSize: 40 }}>🥂</Text>
-            <Text style={{ fontSize: 16, fontWeight: "800", color: "#f3f0e6" }}>还没有选择餐品</Text>
+            <Text style={{ fontSize: 16, fontWeight: "800", color: "#f3f0e6" }}>Your cart is empty</Text>
             <Text style={{ fontSize: 13, color: C.muted, textAlign: "center", lineHeight: 20 }}>
-              去菜单挑选，或让 AI 助手用一句话帮你加购。
+              Browse the menu or ask the concierge to add items in one sentence.
             </Text>
           </View>
         ) : (
@@ -92,7 +92,7 @@ export default function CartScreen() {
                       const opt = g.options.find((o) => o.id === optId);
                       return (
                         <Text key={g.id} style={{ fontSize: 13, color: C.muted }}>
-                          {g.label}：<Text style={{ color: "rgba(233,213,161,0.9)" }}>{opt?.label ?? optId}</Text>
+                          {g.label}: <Text style={{ color: "rgba(233,213,161,0.9)" }}>{opt?.label ?? optId}</Text>
                         </Text>
                       );
                     })}
@@ -112,7 +112,7 @@ export default function CartScreen() {
                     </View>
 
                     <Pressable onPress={() => removeLine(li.lineId)} style={styles.delBtn}>
-                      <Text style={{ color: "rgba(255,255,255,0.65)", fontWeight: "800" }}>删除</Text>
+                      <Text style={{ color: "rgba(255,255,255,0.65)", fontWeight: "800" }}>Remove</Text>
                     </Pressable>
                   </View>
                 </View>
@@ -130,7 +130,7 @@ export default function CartScreen() {
             end={{ x: 1, y: 0.5 }}
             style={styles.checkout}
           >
-            <Text style={{ fontWeight: "900", color: "#1a1204", fontSize: 16 }}>预览结账（MVP 不接支付）</Text>
+            <Text style={{ fontWeight: "900", color: "#1a1204", fontSize: 16 }}>Checkout preview (no payment in MVP)</Text>
           </LinearGradient>
         </View>
       ) : null}
@@ -140,7 +140,7 @@ export default function CartScreen() {
 
 const styles = StyleSheet.create({
   page: { flex: 1, paddingHorizontal: 18, backgroundColor: C.bg },
-  kicker: { fontSize: 12, color: "rgba(233,213,161,0.85)", letterSpacing: 2 },
+  kicker: { fontSize: 12, color: "rgba(233,213,161,0.85)", letterSpacing: 2, textTransform: "uppercase" },
   title: { fontSize: 30, fontWeight: "900", color: C.text },
   toolBtn: {
     borderRadius: 14,

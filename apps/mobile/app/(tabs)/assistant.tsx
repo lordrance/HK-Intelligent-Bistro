@@ -27,19 +27,19 @@ const C = {
 function summarizeAction(a: CartAction): string {
   switch (a.type) {
     case "ADD_LINE":
-      return `新增 ${a.qty} 行（${a.dishId}）`;
+      return `Add ${a.qty} line(s) (${a.dishId})`;
     case "REMOVE_LINE":
-      return `删除行 ${a.lineId.slice(0, 8)}…`;
+      return `Remove line ${a.lineId.slice(0, 8)}…`;
     case "SET_QTY":
-      return `改数量 → ${a.qty}`;
+      return `Set quantity → ${a.qty}`;
     case "UPDATE_MODIFIERS":
-      return "更新规格";
+      return "Update modifiers";
     case "CLEAR_CART":
-      return "清空购物车";
+      return "Clear cart";
     case "REPLACE_DISH":
-      return `替换菜品 → ${a.newDishId}`;
+      return `Replace dish → ${a.newDishId}`;
     default:
-      return "未知动作";
+      return "Unknown action";
   }
 }
 
@@ -72,9 +72,9 @@ export default function AssistantScreen() {
       <View style={[styles.page, { paddingTop: 52 }]}>
         <View style={{ gap: 6, marginBottom: 12 }}>
           <Text style={styles.kicker}>Concierge</Text>
-          <Text style={styles.title}>AI 点餐助手</Text>
+          <Text style={styles.title}>AI concierge</Text>
           <Text style={styles.hint}>
-            混合策略：高置信度「仅加购」会自动落袋；涉及删除/替换/改规格等，会先让你确认。
+            Hybrid policy: high-confidence add-only intents apply instantly; destructive edits ask for confirmation first.
           </Text>
         </View>
 
@@ -87,11 +87,11 @@ export default function AssistantScreen() {
         >
           {messages.length === 0 ? (
             <View style={styles.tipBox}>
-              <Text style={{ color: C.muted, fontSize: 14 }}>试试：</Text>
+              <Text style={{ color: C.muted, fontSize: 14 }}>Try saying:</Text>
               <Text style={{ color: "rgba(233,213,161,0.9)", fontSize: 14 }}>
-                「来一杯中杯港式丝袜奶茶，热的」
+                “One medium HK Silk Milk Tea, hot please.”
               </Text>
-              <Text style={{ color: "rgba(233,213,161,0.9)", fontSize: 14 }}>「清空购物车」</Text>
+              <Text style={{ color: "rgba(233,213,161,0.9)", fontSize: 14 }}>“Clear my cart.”</Text>
             </View>
           ) : null}
 
@@ -118,8 +118,8 @@ export default function AssistantScreen() {
 
         {pending ? (
           <View style={styles.pending}>
-            <Text style={{ fontWeight: "900", color: C.goldSoft, fontSize: 15 }}>待确认的操作</Text>
-            <Text style={{ fontSize: 12, color: C.muted }}>置信度：{pending.confidence.toFixed(2)}</Text>
+            <Text style={{ fontWeight: "900", color: C.goldSoft, fontSize: 15 }}>Pending changes</Text>
+            <Text style={{ fontSize: 12, color: C.muted }}>Confidence: {pending.confidence.toFixed(2)}</Text>
             {pending.actions.map((a, i) => (
               <Text key={i} style={{ fontSize: 13, color: "rgba(255,255,255,0.75)" }}>
                 • {summarizeAction(a)}
@@ -131,11 +131,11 @@ export default function AssistantScreen() {
                   colors={[C.gold, C.goldSoft]}
                   style={{ borderRadius: 14, paddingVertical: 12, alignItems: "center" }}
                 >
-                  <Text style={{ color: "#1a1204", fontWeight: "900" }}>应用到购物车</Text>
+                  <Text style={{ color: "#1a1204", fontWeight: "900" }}>Apply to cart</Text>
                 </LinearGradient>
               </Pressable>
               <Pressable style={[styles.ignoreBtn, { flex: 1 }]} onPress={() => dismiss()}>
-                <Text style={{ color: "#f3f0e6", fontWeight: "800", textAlign: "center" }}>忽略</Text>
+                <Text style={{ color: "#f3f0e6", fontWeight: "800", textAlign: "center" }}>Dismiss</Text>
               </Pressable>
             </View>
           </View>
@@ -145,7 +145,7 @@ export default function AssistantScreen() {
           <View style={styles.inputRow}>
             <TextInput
               style={styles.input}
-              placeholder="用中文描述你想点的…"
+              placeholder="Describe what you would like…"
               placeholderTextColor="rgba(255,255,255,0.35)"
               value={text}
               onChangeText={setText}
@@ -155,7 +155,7 @@ export default function AssistantScreen() {
             <Pressable onPress={onSend} disabled={busy}>
               <LinearGradient colors={[C.gold, C.goldSoft]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
                 <View style={{ paddingHorizontal: 16, paddingVertical: 10, borderRadius: 14 }}>
-                  <Text style={{ fontWeight: "900", color: "#1a1204" }}>{busy ? "…" : "发送"}</Text>
+                  <Text style={{ fontWeight: "900", color: "#1a1204" }}>{busy ? "…" : "Send"}</Text>
                 </View>
               </LinearGradient>
             </Pressable>
@@ -168,7 +168,7 @@ export default function AssistantScreen() {
 
 const styles = StyleSheet.create({
   page: { flex: 1, paddingHorizontal: 18, backgroundColor: C.bg },
-  kicker: { fontSize: 12, color: "rgba(233,213,161,0.85)", letterSpacing: 2 },
+  kicker: { fontSize: 12, color: "rgba(233,213,161,0.85)", letterSpacing: 2, textTransform: "uppercase" },
   title: { fontSize: 30, fontWeight: "900", color: C.text },
   hint: { fontSize: 13, color: C.muted, maxWidth: 380, lineHeight: 20 },
   tipBox: {

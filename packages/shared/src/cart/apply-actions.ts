@@ -22,7 +22,7 @@ export type ApplyResult =
   | { ok: false; error: string };
 
 /**
- * 将服务端返回的 cart_actions 顺序应用到购物车（纯函数，可单测）。
+ * Applies server-returned cart_actions in order (pure function; unit-test friendly).
  */
 export function applyCartActions(cart: Cart, actions: CartAction[]): ApplyResult {
   let items = cart.items.map((i) => ({ ...i, selectedModifiers: { ...i.selectedModifiers } }));

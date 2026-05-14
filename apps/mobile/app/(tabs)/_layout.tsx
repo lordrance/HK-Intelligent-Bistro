@@ -27,9 +27,9 @@ export default function TabsLayout() {
           tabBarLabelStyle: { fontSize: 11, fontWeight: "700" },
         }}
       >
-        <Tabs.Screen name="index" options={{ title: "菜单", tabBarIcon: () => <Text style={styles.emoji}>🍽</Text> }} />
-        <Tabs.Screen name="cart" options={{ title: "购物车", tabBarIcon: () => <Text style={styles.emoji}>🛒</Text> }} />
-        <Tabs.Screen name="assistant" options={{ title: "AI 助手", tabBarIcon: () => <Text style={styles.emoji}>✨</Text> }} />
+        <Tabs.Screen name="index" options={{ title: "Menu", tabBarIcon: () => <Text style={styles.emoji}>🍽</Text> }} />
+        <Tabs.Screen name="cart" options={{ title: "Cart", tabBarIcon: () => <Text style={styles.emoji}>🛒</Text> }} />
+        <Tabs.Screen name="assistant" options={{ title: "Concierge", tabBarIcon: () => <Text style={styles.emoji}>✨</Text> }} />
       </Tabs>
     </View>
   );

@@ -11,31 +11,31 @@ export function validateCartActions(catalog: Catalog, cartLineIds: Set<string>, 
     if (a.type === "ADD_LINE" || a.type === "REPLACE_DISH") {
       const dishId = a.type === "ADD_LINE" ? a.dishId : a.newDishId;
       const dish = getDishById(catalog, dishId);
-      if (!dish) return { ok: false, reason: `未知菜品 id: ${dishId}` };
+      if (!dish) return { ok: false, reason: `Unknown dish id: ${dishId}` };
 
       const groups = dish.modifierGroups ?? [];
       for (const g of groups) {
         const picked = a.selectedModifiers?.[g.id];
         if (g.required && !picked) {
-          return { ok: false, reason: `缺少必选规格组：${g.label}（${g.id}）` };
+          return { ok: false, reason: `Missing required modifier group: ${g.label} (${g.id})` };
         }
         if (!picked) continue;
         const okOpt = g.options.some((o) => o.id === picked);
-        if (!okOpt) return { ok: false, reason: `非法选项：组 ${g.id} -> ${picked}` };
+        if (!okOpt) return { ok: false, reason: `Invalid option for group ${g.id} -> ${picked}` };
       }
-      // 防止模型塞入额外组 key：允许为空；若有 key 必须对应真实组
+      // Reject unknown modifier group keys on the payload
       for (const key of Object.keys(a.selectedModifiers ?? {})) {
         const g = groups.find((x) => x.id === key);
-        if (!g) return { ok: false, reason: `未知规格组 key: ${key}` };
+        if (!g) return { ok: false, reason: `Unknown modifier group key: ${key}` };
       }
     }
     if (a.type === "REMOVE_LINE" || a.type === "SET_QTY" || a.type === "UPDATE_MODIFIERS" || a.type === "REPLACE_DISH") {
       if (!cartLineIds.has(a.lineId)) {
-        return { ok: false, reason: `购物车中不存在 lineId: ${a.lineId}` };
+        return { ok: false, reason: `lineId not found in cart: ${a.lineId}` };
       }
     }
     if (a.type === "SET_QTY" && a.qty < 0) {
-      return { ok: false, reason: "SET_QTY qty 不能为负数" };
+      return { ok: false, reason: "SET_QTY qty cannot be negative" };
     }
   }
   return { ok: true, actions };

@@ -1,40 +1,54 @@
 # HK Intelligent Bistro
 
-Monorepo：Expo（React Native + Web）客户端 + Node（Fastify）后端 + 共享 Zod 契约（`@hk/shared`）。
+Monorepo: **Expo (React Native + Web)** client, **Node (Fastify)** API, and shared **Zod** contracts in `@hk/shared`.
 
-## 本地运行
+## Prerequisites
 
-1. 复制环境变量模板并填写 **DeepSeek** 密钥（仅本地，勿提交）：
+- Node 20+
+- pnpm 9+
+
+## Setup
+
+1. Copy env template and set your **DeepSeek** key locally (never commit real secrets):
 
 ```bash
 cp .env.example .env
 ```
 
-2. 安装依赖并构建共享包：
+2. Install and build shared types:
 
 ```bash
 pnpm install
 pnpm --filter @hk/shared build
 ```
 
-3. 启动 API（默认 `http://0.0.0.0:8787`）：
+3. Start the API (default `http://0.0.0.0:8787`):
 
 ```bash
 pnpm dev:server
 ```
 
-4. 启动移动端（另开终端；真机请设置 `EXPO_PUBLIC_API_BASE_URL` 指向你电脑的局域网地址）：
+4. Start the app (separate terminal). For a physical device, point `EXPO_PUBLIC_API_BASE_URL` to your machine’s LAN IP:
 
 ```bash
 pnpm dev:mobile
 ```
 
-## 说明
+## Product notes
 
-- **AI**：`/assistant/intent` 使用 DeepSeek（OpenAI 兼容 `baseURL`）+ `json_object` 输出，再由服务端做 **动作校验**。
-- **购物车**：客户端与后端共用 `applyCartActions`（`packages/shared`）。
-- **UI**：当前阶段使用 **React Native + StyleSheet + 渐变** 实现高质感暗色餐吧风界面；原计划 Tamagui 2 RC 与当前 TypeScript 存在 `children`/`filter` 样式键冲突，故暂用 RN 原生组件以保证可维护构建；后续可换稳定版 Tamagui 或 NativeWind。
+- **AI**: `POST /assistant/intent` calls DeepSeek (OpenAI-compatible `baseURL`) with `json_object`, then **server-side validation** applies guardrails.
+- **Cart**: Client and server share `applyCartActions` from `packages/shared`.
+- **UI language**: All user-facing copy in the app and seed catalog is **English**. The concierge prompt asks the model to reply in English.
+- **UI stack**: React Native primitives + `StyleSheet` + `expo-linear-gradient` for a polished dark “bistro” look (Tamagui was deferred due to TS friction in the RC we tried).
 
-## 阶段规划（后续）
+## Tests
 
-- 语音输入、订单历史、支付前校验、E2E 测试、Docker Compose 等。
+```bash
+pnpm test
+```
+
+- **Catalog**: The API reads `apps/server/data/catalog.json` on each request (no stale in-memory cache after edits).
+
+## Roadmap
+
+Voice input, order history, stricter checkout, E2E tests, Docker Compose.

@@ -22,7 +22,7 @@ function scoreDish(q: string, dish: Dish): number {
   return score;
 }
 
-/** 从用户输入里拆出若干 token（中英数字），用于粗召回 */
+/** Tokenize user text (letters & numbers) for coarse dish recall. */
 function tokens(userText: string): string[] {
   const cleaned = userText.replace(/[^\p{L}\p{N}]+/gu, " ");
   return cleaned.split(/\s+/).filter(Boolean).slice(0, 12);

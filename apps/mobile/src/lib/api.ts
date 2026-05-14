@@ -1,7 +1,7 @@
 import Constants from "expo-constants";
 import { Platform } from "react-native";
 
-/** 真机调试可设置 EXPO_PUBLIC_API_BASE_URL 指向电脑局域网 IP */
+/** Set EXPO_PUBLIC_API_BASE_URL to your machine LAN IP when testing on a physical device. */
 export function getApiBaseUrl(): string {
   const fromExtra = Constants.expoConfig?.extra?.apiBaseUrl as string | undefined;
   if (fromExtra && fromExtra.length > 0) return fromExtra.replace(/\/$/, "");

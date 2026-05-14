@@ -55,7 +55,7 @@ export const ClarificationSchema = z.object({
 export const AssistantIntentResponseSchema = z.object({
   assistant_message: z.string(),
   cart_actions: z.array(CartActionSchema).default([]),
-  /** 模型有时会输出 null；与 undefined 同等视为「无需澄清」 */
+  /** Model may emit null; treat like undefined (no clarification). */
   needs_clarification: ClarificationSchema.optional().nullable(),
   confidence: z.number().min(0).max(1).default(0.5),
   trace_id: z.string().optional(),

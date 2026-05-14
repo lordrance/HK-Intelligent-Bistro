@@ -59,7 +59,7 @@ export default function MenuScreen() {
     return (
       <View style={[styles.page, { paddingTop: 56 }]}>
         <Text style={styles.hero}>Intelligent Bistro</Text>
-        <Text style={styles.sub}>正在为你准备菜单…</Text>
+        <Text style={styles.sub}>Preparing the menu…</Text>
       </View>
     );
   }
@@ -68,8 +68,10 @@ export default function MenuScreen() {
     <View style={[styles.page, { paddingTop: 52 }]}>
       <View style={{ gap: 6, marginBottom: 14 }}>
         <Text style={styles.kicker}>Hong Kong · Bistro</Text>
-        <Text style={styles.title}>今晚想吃点什么？</Text>
-        <Text style={styles.sub}>轻触卡片查看规格；也可以去「AI 助手」用自然语言直接改购物车。</Text>
+        <Text style={styles.title}>What are we craving tonight?</Text>
+        <Text style={styles.sub}>
+          Tap a card to choose options, or open Concierge to steer the cart with natural language.
+        </Text>
       </View>
 
       <GlassCard>
@@ -77,7 +79,7 @@ export default function MenuScreen() {
           <Text style={{ color: C.muted, fontSize: 16 }}>⌕</Text>
           <TextInput
             style={styles.searchInput}
-            placeholder="搜索菜名、别名或分类…"
+            placeholder="Search dishes, aliases, or categories…"
             placeholderTextColor="rgba(255,255,255,0.35)"
             value={q}
             onChangeText={setQ}
@@ -136,7 +138,7 @@ export default function MenuScreen() {
                         {dish.description}
                       </Text>
                       <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-                        <Text style={{ fontSize: 12, color: "rgba(233,213,161,0.75)" }}>点按选择规格</Text>
+                        <Text style={{ fontSize: 12, color: "rgba(233,213,161,0.75)" }}>Tap to customize</Text>
                         <Text style={{ fontSize: 20, color: C.gold }}>→</Text>
                       </View>
                     </View>

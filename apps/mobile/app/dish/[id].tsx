@@ -39,9 +39,9 @@ export default function DishDetailScreen() {
     return (
       <Pressable style={styles.backdrop} onPress={() => router.back()}>
         <View style={styles.centerBox}>
-          <Text style={{ color: "#fff" }}>未找到菜品</Text>
+          <Text style={{ color: "#fff" }}>Dish not found</Text>
           <Pressable onPress={() => router.back()} style={styles.backBtn}>
-            <Text style={{ color: C.goldSoft, fontWeight: "800" }}>返回</Text>
+            <Text style={{ color: C.goldSoft, fontWeight: "800" }}>Back</Text>
           </Pressable>
         </View>
       </Pressable>
@@ -73,7 +73,7 @@ export default function DishDetailScreen() {
                     <Text style={{ fontSize: 14, color: C.muted, lineHeight: 20 }}>{dish.description}</Text>
                   </View>
                   <View style={{ alignItems: "flex-end", gap: 4 }}>
-                    <Text style={{ fontSize: 12, color: "rgba(255,255,255,0.45)" }}>单价预览</Text>
+                    <Text style={{ fontSize: 12, color: "rgba(255,255,255,0.45)" }}>Unit preview</Text>
                     <Text style={{ fontSize: 22, fontWeight: "900", color: C.goldSoft }}>
                       {catalog.currency} {unit}
                     </Text>
@@ -133,12 +133,12 @@ export default function DishDetailScreen() {
                     style={{ borderRadius: 16, paddingVertical: 14, alignItems: "center" }}
                   >
                     <Text style={{ color: "#1a1204", fontWeight: "900", fontSize: 16 }}>
-                      加入购物车 · {catalog.currency} {unit}
+                      Add to cart · {catalog.currency} {unit}
                     </Text>
                   </LinearGradient>
                 </Pressable>
                 <Text style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", textAlign: "center" }}>
-                  加入后可在购物车或 AI 助手中继续调整
+                  You can refine this later in the cart or with the concierge.
                 </Text>
               </View>
             </ScrollView>

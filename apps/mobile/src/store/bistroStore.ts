@@ -143,7 +143,7 @@ export const useBistroStore = create<{
             ...s.messages,
             {
               role: "assistant",
-              content: `${json.assistant_message}\n\n（未能自动应用：${r.error}）`,
+              content: `${json.assistant_message}\n\n(Auto-apply failed: ${r.error})`,
             },
           ],
           pending: null,

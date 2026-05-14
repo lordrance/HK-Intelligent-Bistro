@@ -1,11 +1,11 @@
 import { z } from "zod";
 
-/** 每行购物车：lineId 用于稳定定位（AI REMOVE/SET_QTY 等） */
+/** One cart line; lineId is stable for REMOVE / SET_QTY from the assistant. */
 export const CartLineSchema = z.object({
   lineId: z.string(),
   dishId: z.string(),
   qty: z.number().int().positive(),
-  /** modifierOptionId -> 选中的 option id（单选组一个 key） */
+  /** modifierGroupId -> selected option id */
   selectedModifiers: z.record(z.string()).default({}),
   note: z.string().optional(),
 });
