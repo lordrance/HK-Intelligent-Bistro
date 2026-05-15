@@ -25,6 +25,13 @@ In-app copy and the seed **menu are English**. The Concierge system prompt instr
 - [FAQ](#faq)
 - [Roadmap (non-binding)](#roadmap-non-binding)
 - [GitHub repository profile](#github-repository-profile)
+  - [Short description](#short-description-github-description-field--max-350-characters-keep-under-limit)
+  - [Longer blurb](#longer-blurb-readme-intro-about-sidebar-if-you-paste-extended-text-elsewhere)
+  - [Detailed repository description](#detailed-repository-description-english-for-submissions-or-extended-about)
+  - [Brief overview of code structure](#brief-overview-of-code-structure)
+  - [AI tools used in development](#ai-tools-used-in-development)
+  - [Suggested Topics](#suggested-topics)
+  - [GitHub CLI (optional)](#github-cli-optional)
 - [License and contributing](#license-and-contributing)
 - [Optional: update `main` from a feature branch](#optional-update-main-from-a-feature-branch)
 
@@ -273,7 +280,7 @@ Voice input, order history, real PSP integration, Playwright / Detox E2E, static
 
 ## GitHub repository profile
 
-Use the following on the GitHub repository **About** section (**Description**, **Website**, **Topics**).
+Use the following on the GitHub repository **About** section (**Description**, **Website**, **Topics**). The **detailed description** and **code structure** blocks are suitable for a submission README, employer-facing profile, or an extended “About” / pinned discussion.
 
 ### Short description (GitHub “Description” field — max ~350 characters; keep under limit)
 
@@ -282,6 +289,25 @@ Use the following on the GitHub repository **About** section (**Description**, *
 ### Longer blurb (README intro, “About” sidebar if you paste extended text elsewhere)
 
 > **HK Intelligent Bistro** is a demonstration monorepo for a Hong Kong–style café ordering experience. It combines an **Expo** client (React Native and Web) with a **Fastify** API and **SQLite**, **JWT** authentication, a **DeepSeek**-backed natural-language concierge, and a shared **Zod**-typed package for cart operations. The API can run under **Docker Compose**; tests use **Vitest** plus an optional **HTTP smoke** script.
+
+### Detailed repository description (English, for submissions or extended About)
+
+**HK Intelligent Bistro** delivers a polished mobile-first (and Web) restaurant ordering demo. Users authenticate with email and password, browse a seeded catalog with modifiers, manage a cart from both the **menu UI** and a **natural-language Concierge**, and complete a **simulated checkout**. The Concierge calls a hosted **large language model (DeepSeek)** via an OpenAI-compatible API; the server never trusts raw model output blindly—it **parses strict JSON**, validates **`cart_actions`** against the live catalog and cart, and returns safe, typed payloads that the client applies with the same pure functions used by the UI.
+
+### Brief overview of code structure
+
+| Area | Role |
+|------|------|
+| **`apps/mobile`** | **Expo Router** app: screens under `app/` (login, register, tabs for menu / cart / concierge, dish modal, checkout); **Zustand** stores (`src/store/authStore.ts`, `src/store/bistroStore.ts`); **NativeWind** + Tailwind styling (`tailwind.config.ts`, `app/global.css`); **`apiFetch`** attaches JWT; concierge flow merges assistant JSON into the cart via **`applyCartActions`** from shared. |
+| **`apps/server`** | **Fastify** app (`src/build-app.ts`): **JWT** auth routes (`auth-routes.ts`, `auth-jwt.ts`), **`GET /catalog`**, **`POST /assistant/intent`** (`assistant.ts`—system prompt, DeepSeek call, **Zod** parse, **`validateCartActions`**), SQLite persistence (`db.ts`), static `data/catalog.json`. |
+| **`packages/shared`** | **Single source of truth** for API contracts: **Zod** schemas for catalog, cart, assistant request/response, and **`CartAction`** variants; pure **`applyCartActions`** and **`formatCartActionSummary`** so server and client stay aligned. |
+| **Root** | **pnpm** workspace, **`docker-compose.yml`** for API-only container, **`scripts/smoke-e2e.mjs`** against a running API, **`pnpm test:journey`** for a stubbed end-to-end HTTP journey without calling the live LLM. |
+
+Data flow (concierge): **Mobile** → `POST /assistant/intent` (cart + `catalogVersion` + history) → **Server** validates version → **DeepSeek** returns JSON → **Zod** + **`validateCartActions`** → response → **Client** `applyCartActions` / pending confirmation → **Cart UI** updates.
+
+### AI tools used in development
+
+Most implementation, refactors, tests, Docker wiring, and this documentation were built **AI-assisted inside Cursor** (agent-style edits, multi-file refactors, and terminal-integrated checks). **DeepSeek** is used **at application runtime** as the ordering model behind `POST /assistant/intent`, which is separate from the IDE tooling. For a **Loom** or employer submission, you can say: *“Code structure: monorepo with Expo client, Fastify API, and shared Zod package; development accelerated with Cursor AI editing and review.”*
 
 ### Suggested Topics
 
@@ -292,7 +318,7 @@ Use the following on the GitHub repository **About** section (**Description**, *
 With [GitHub CLI](https://cli.github.com/) authenticated:
 
 ```bash
-gh repo edit OWNER/REPO --description "Expo + Fastify monorepo: JWT auth, SQLite catalog, DeepSeek NL concierge, Zod shared contracts, Docker API, Vitest."
+gh repo edit OWNER/REPO --description "Expo + Fastify monorepo: JWT, SQLite, DeepSeek NL concierge, Zod shared cart, Docker API, Vitest. AI-assisted development in Cursor; see README for code structure."
 ```
 
 Replace **`OWNER/REPO`** with your path (for example **`lordrance/HK-Intelligent-Bistro`**).
