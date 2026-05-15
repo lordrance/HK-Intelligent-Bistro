@@ -1,0 +1,23 @@
+/** Bistro design tokens — shared across Menu / Dish / Cart / Concierge. */
+export const T = {
+  bg: "#05060a",
+  bgElevated: "#0b0d14",
+  panel: "#0c0e14",
+  text: "#fdf8ef",
+  muted: "rgba(255,255,255,0.55)",
+  gold: "#d4af65",
+  goldSoft: "#f5ecd4",
+  goldDim: "rgba(233,213,161,0.85)",
+  line: "rgba(255,255,255,0.1)",
+  glass: "rgba(255,255,255,0.06)",
+  glassStrong: "rgba(255,255,255,0.09)",
+  shadow: "rgba(0,0,0,0.45)",
+  radii: { sm: 12, md: 16, lg: 20, xl: 26, sheet: 28 },
+  space: { xs: 6, sm: 10, md: 14, lg: 18, xl: 22 },
+  titleHero: 28,
+  titlePage: 30,
+  titlePageCompact: 26,
+  kicker: 12,
+  body: 14,
+  caption: 12,
+} as const;

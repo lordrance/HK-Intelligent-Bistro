@@ -1,14 +1,14 @@
 {
-  "version": "2026.05.15",
-  "currency": "HKD",
+  "version": "2026.05.16",
+  "currency": "USD",
   "dishes": [
     {
       "id": "d_hk_milk_tea",
       "name": "HK Silk Milk Tea",
       "description": "Strong tea pull, silky milk, classic cha chaan teng style.",
       "category": "Drinks",
-      "basePrice": 28,
-      "imageUrl": "https://images.unsplash.com/photo-1544787219-7f65ccb81c85?w=800&q=80",
+      "basePrice": 3.99,
+      "imageUrl": "https://images.unsplash.com/photo-1571934811356-5cc061b6821f?auto=format&fit=crop&w=800&q=80",
       "aliases": ["milk tea", "silk stocking tea", "hk milk tea", "pantyhose tea"],
       "modifierGroups": [
         {
@@ -18,7 +18,7 @@
           "maxSelect": 1,
           "options": [
             { "id": "mo_size_m", "label": "Medium", "priceDelta": 0 },
-            { "id": "mo_size_l", "label": "Large", "priceDelta": 6 }
+            { "id": "mo_size_l", "label": "Large", "priceDelta": 0.99 }
           ]
         },
         {
@@ -30,27 +30,6 @@
             { "id": "mo_ice_hot", "label": "Hot", "priceDelta": 0 },
             { "id": "mo_ice_less", "label": "Less ice", "priceDelta": 0 },
             { "id": "mo_ice_normal", "label": "Normal ice", "priceDelta": 0 }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "d_lemon_tea",
-      "name": "Iced Lemon Tea",
-      "description": "Bright citrus, refreshing finish.",
-      "category": "Drinks",
-      "basePrice": 26,
-      "imageUrl": "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=800&q=80",
-      "aliases": ["lemon tea", "iced lemon", "citrus tea"],
-      "modifierGroups": [
-        {
-          "id": "mg_size",
-          "label": "Size",
-          "required": true,
-          "maxSelect": 1,
-          "options": [
-            { "id": "mo_size_m", "label": "Medium", "priceDelta": 0 },
-            { "id": "mo_size_l", "label": "Large", "priceDelta": 6 }
           ]
         },
         {
@@ -67,12 +46,55 @@
       ]
     },
     {
+      "id": "d_lemon_tea",
+      "name": "Iced Lemon Tea",
+      "description": "Bright citrus, refreshing finish.",
+      "category": "Drinks",
+      "basePrice": 3.49,
+      "imageUrl": "https://images.unsplash.com/photo-1556679343-c7306c1976bc?auto=format&fit=crop&w=800&q=80",
+      "aliases": ["lemon tea", "iced lemon", "citrus tea"],
+      "modifierGroups": [
+        {
+          "id": "mg_size",
+          "label": "Size",
+          "required": true,
+          "maxSelect": 1,
+          "options": [
+            { "id": "mo_size_m", "label": "Medium", "priceDelta": 0 },
+            { "id": "mo_size_l", "label": "Large", "priceDelta": 0.99 }
+          ]
+        },
+        {
+          "id": "mg_sugar",
+          "label": "Sweetness",
+          "required": true,
+          "maxSelect": 1,
+          "options": [
+            { "id": "mo_sugar_full", "label": "Full sugar", "priceDelta": 0 },
+            { "id": "mo_sugar_half", "label": "Half sugar", "priceDelta": 0 },
+            { "id": "mo_sugar_zero", "label": "No sugar", "priceDelta": 0 }
+          ]
+        },
+        {
+          "id": "mg_ice_level",
+          "label": "Ice level",
+          "required": true,
+          "maxSelect": 1,
+          "options": [
+            { "id": "mo_ice_lvl_reg", "label": "Regular ice", "priceDelta": 0 },
+            { "id": "mo_ice_lvl_less", "label": "Less ice", "priceDelta": 0 },
+            { "id": "mo_ice_lvl_none", "label": "No ice", "priceDelta": 0 }
+          ]
+        }
+      ]
+    },
+    {
       "id": "d_spicy_chicken",
       "name": "Spicy Chicken Cutlet Bun",
       "description": "Crispy cutlet, house chili sauce, crunchy lettuce.",
       "category": "Mains",
-      "basePrice": 52,
-      "imageUrl": "https://images.unsplash.com/photo-1606755962773-d324e788a873?w=800&q=80",
+      "basePrice": 6.99,
+      "imageUrl": "https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?auto=format&fit=crop&w=800&q=80",
       "aliases": ["chicken bun", "spicy chicken", "cutlet bun"],
       "modifierGroups": [
         {
@@ -83,7 +105,29 @@
           "options": [
             { "id": "mo_spice_mild", "label": "Mild", "priceDelta": 0 },
             { "id": "mo_spice_hot", "label": "Medium", "priceDelta": 0 },
-            { "id": "mo_spice_extra", "label": "Extra hot", "priceDelta": 2 }
+            { "id": "mo_spice_extra", "label": "Extra hot", "priceDelta": 0.49 }
+          ]
+        },
+        {
+          "id": "mg_addon",
+          "label": "Add-ons",
+          "required": true,
+          "maxSelect": 1,
+          "options": [
+            { "id": "mo_add_none", "label": "None", "priceDelta": 0 },
+            { "id": "mo_add_lettuce", "label": "Extra lettuce", "priceDelta": 0.49 },
+            { "id": "mo_add_sauce", "label": "Extra sauce", "priceDelta": 0.49 }
+          ]
+        },
+        {
+          "id": "mg_toast",
+          "label": "Bun toast",
+          "required": true,
+          "maxSelect": 1,
+          "options": [
+            { "id": "mo_toast_std", "label": "Standard", "priceDelta": 0 },
+            { "id": "mo_toast_light", "label": "Lightly toasted", "priceDelta": 0 },
+            { "id": "mo_toast_crisp", "label": "Extra crispy", "priceDelta": 0 }
           ]
         }
       ]
@@ -93,8 +137,8 @@
       "name": "Honey Glazed BBQ Pork Rice",
       "description": "Half-fatty char siu, glossy honey glaze, rice and greens.",
       "category": "Mains",
-      "basePrice": 68,
-      "imageUrl": "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=800&q=80",
+      "basePrice": 8.99,
+      "imageUrl": "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=800&q=80",
       "aliases": ["char siu rice", "bbq pork rice", "glazed pork bowl"],
       "modifierGroups": [
         {
@@ -104,7 +148,18 @@
           "maxSelect": 1,
           "options": [
             { "id": "mo_rice_normal", "label": "Regular portion", "priceDelta": 0 },
-            { "id": "mo_rice_extra", "label": "Extra rice", "priceDelta": 8 }
+            { "id": "mo_rice_extra", "label": "Extra rice", "priceDelta": 0.99 }
+          ]
+        },
+        {
+          "id": "mg_egg",
+          "label": "Egg",
+          "required": true,
+          "maxSelect": 1,
+          "options": [
+            { "id": "mo_egg_no", "label": "No egg", "priceDelta": 0 },
+            { "id": "mo_egg_fry", "label": "Fried egg", "priceDelta": 0.99 },
+            { "id": "mo_egg_soft", "label": "Soft-boiled", "priceDelta": 0.99 }
           ]
         }
       ]
@@ -114,8 +169,8 @@
       "name": "Curry Fish Balls",
       "description": "Street-style curry, bouncy fish balls.",
       "category": "Snacks",
-      "basePrice": 32,
-      "imageUrl": "https://images.unsplash.com/photo-1562967914-608f82629710?w=800&q=80",
+      "basePrice": 3.99,
+      "imageUrl": "https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=800&q=80",
       "aliases": ["fish balls", "curry balls", "street snack"],
       "modifierGroups": []
     },
@@ -124,8 +179,8 @@
       "name": "Portuguese Egg Tart",
       "description": "Flaky layers, silky custard center.",
       "category": "Desserts",
-      "basePrice": 18,
-      "imageUrl": "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=800&q=80",
+      "basePrice": 2.49,
+      "imageUrl": "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?auto=format&fit=crop&w=800&q=80",
       "aliases": ["egg tart", "pasteis de nata", "custard tart"],
       "modifierGroups": [
         {

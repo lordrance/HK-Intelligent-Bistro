@@ -1,25 +1,17 @@
 import { LinearGradient } from "expo-linear-gradient";
-import { StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
-import {
-  Box,
-  Button,
-  ButtonText,
-  HStack,
-  Heading,
-  Pressable,
-  ScrollView,
-  Text,
-  VStack,
-} from "@gluestack-ui/themed";
-import { useAuthStore } from "../../src/store/authStore";
-import { useBistroStore } from "../../src/store/bistroStore";
-import { cartTotal, lineUnitPrice } from "../../src/lib/pricing";
-import { useAppShell } from "../../src/lib/responsive";
-import { getApiBaseUrl } from "../../src/lib/api";
-import { scrollViewFill } from "../../src/lib/scrollStyles";
-import { formatCatalogMoney } from "../../src/lib/formatMoney";
-import { T } from "../../src/theme/tokens";
+import { Pressable, ScrollView, Text, View } from "react-native";
+
+import { BistroScreenBackground } from "@/components/BistroScreenBackground";
+import { LogOutButton } from "@/components/LogOutButton";
+import { Button, ButtonText } from "@/components/ui";
+import { getApiBaseUrl } from "@/lib/api";
+import { cartTotal, lineUnitPrice } from "@/lib/pricing";
+import { formatCatalogMoney } from "@/lib/formatMoney";
+import { useAppShell } from "@/lib/responsive";
+import { scrollViewFill } from "@/lib/scrollStyles";
+import { useBistroStore } from "@/store/bistroStore";
+import { T } from "@/theme/tokens";
 
 export default function CartScreen() {
   const router = useRouter();
@@ -32,231 +24,159 @@ export default function CartScreen() {
   const removeLine = useBistroStore((s) => s.removeLine);
   const clearCart = useBistroStore((s) => s.clearCart);
   const undo = useBistroStore((s) => s.undo);
-  const resetAfterLogout = useBistroStore((s) => s.resetAfterLogout);
 
   const titleSize = shell.compactWeb ? T.titlePageCompact : T.titlePage;
-
-  async function onLogout() {
-    await useAuthStore.getState().clearSession();
-    resetAfterLogout();
-    router.replace("/login");
-  }
+  const pagePad = { paddingHorizontal: shell.pagePadding };
 
   if (catalogLoading) {
     return (
-      <Box flex={1} bg={T.bg} pt={56} px={shell.pagePadding}>
-        <LinearGradient colors={["#0a0c12", T.bg, "#12151f"]} style={StyleSheet.absoluteFill} />
-        <VStack maxWidth={960} w="100%" alignSelf="center">
-          <Text color={T.muted}>Loading cart…</Text>
-        </VStack>
-      </Box>
+      <View className="flex-1 bg-bistro-bg pt-14" style={pagePad}>
+        <BistroScreenBackground />
+        <View className="w-full max-w-[960px] self-center">
+          <Text className="text-bistro-muted">Loading cart…</Text>
+        </View>
+      </View>
     );
   }
 
   if (!catalog) {
     return (
-      <Box flex={1} bg={T.bg} pt={56} px={shell.pagePadding}>
-        <LinearGradient colors={["#0a0c12", T.bg, "#12151f"]} style={StyleSheet.absoluteFill} />
-        <VStack maxWidth={960} w="100%" alignSelf="center" space="md">
-          <Heading size="xl" fontWeight="$black" color={T.text} fontSize={titleSize} mb="$2.5">
+      <View className="flex-1 bg-bistro-bg pt-14" style={pagePad}>
+        <BistroScreenBackground />
+        <View className="w-full max-w-[960px] self-center gap-4">
+          <Text className="mb-2.5 font-black text-bistro-text" style={{ fontSize: titleSize }}>
             Menu unavailable
-          </Heading>
-          <Text color={T.muted}>
+          </Text>
+          <Text className="text-bistro-muted">
             The menu could not be loaded, so prices and dish names cannot be shown. Check the API and try again.
           </Text>
-          <Button variant="outline" action="primary" alignSelf="flex-start" onPress={() => void loadCatalog(getApiBaseUrl())}>
+          <Button className="self-start" variant="outline" onPress={() => void loadCatalog(getApiBaseUrl())}>
             <ButtonText>Retry</ButtonText>
           </Button>
-        </VStack>
-      </Box>
+        </View>
+      </View>
     );
   }
 
   const total = cartTotal(catalog, cart);
 
   return (
-    <Box flex={1} bg={T.bg} pt="$12" px={shell.pagePadding}>
-      <LinearGradient colors={["#0a0c12", T.bg, "#12151f"]} style={StyleSheet.absoluteFill} />
-      <VStack flex={1} maxWidth={960} w="100%" alignSelf="center">
-        <HStack justifyContent="space-between" alignItems="flex-end" mb="$3.5">
-          <VStack space="xs">
-            <Text fontSize="$xs" color={T.goldDim} letterSpacing={2} textTransform="uppercase">
-              Your order
-            </Text>
-            <Heading size="xl" fontWeight="$black" color={T.text} fontSize={titleSize}>
+    <View className="flex-1 bg-bistro-bg pt-12" style={pagePad}>
+      <BistroScreenBackground />
+      <View className="w-full max-w-[960px] flex-1 self-center">
+        <View className="mb-1.5 flex-row justify-end">
+          <LogOutButton />
+        </View>
+        <View className="mb-3.5 flex-row items-end justify-between">
+          <View className="gap-1">
+            <Text className="text-xs uppercase tracking-[2px] text-bistro-gold-dim">Your order</Text>
+            <Text className="font-black text-bistro-text" style={{ fontSize: titleSize }}>
               Cart
-            </Heading>
-          </VStack>
-          <VStack alignItems="flex-end" space="xs">
-            <Text fontSize="$xs" color="rgba(255,255,255,0.45)">
-              Total
             </Text>
-            <Text fontSize="$2xl" fontWeight="$black" color={T.goldSoft}>
-              {formatCatalogMoney(catalog.currency, total)}
-            </Text>
-          </VStack>
-        </HStack>
+          </View>
+          <View className="items-end gap-1">
+            <Text className="text-xs text-white/45">Total</Text>
+            <Text className="text-2xl font-black text-bistro-gold-soft">{formatCatalogMoney(catalog.currency, total)}</Text>
+          </View>
+        </View>
 
-        <HStack space="sm" mb="$3.5">
-          <Button flex={1} variant="outline" action="secondary" onPress={() => undo()}>
+        <View className="mb-3.5 flex-row gap-2">
+          <Button className="flex-1" variant="outline" onPress={() => undo()}>
             <ButtonText>Undo</ButtonText>
           </Button>
-          <Button
-            flex={1}
-            variant="outline"
-            action="secondary"
-            borderColor="rgba(239,68,68,0.35)"
-            bg="rgba(239,68,68,0.12)"
-            onPress={() => clearCart()}
-          >
-            <ButtonText color="#fecaca">Clear</ButtonText>
+          <Button className="flex-1" variant="destructive" onPress={() => clearCart()}>
+            <ButtonText variant="destructive">Clear</ButtonText>
           </Button>
-          <Button flex={1} variant="outline" action="secondary" onPress={() => void onLogout()}>
-            <ButtonText>Log out</ButtonText>
-          </Button>
-        </HStack>
+        </View>
 
         <ScrollView
           style={scrollViewFill()}
-          showsVerticalScrollIndicator
-          contentContainerStyle={{ paddingBottom: 120 }}
+          showsVerticalScrollIndicator={cart.items.length > 0}
+          contentContainerStyle={{ paddingBottom: 120, flexGrow: cart.items.length === 0 ? 1 : undefined }}
         >
           {cart.items.length === 0 ? (
-            <VStack
-              p="$7"
-              borderRadius="$lg"
-              borderWidth={1}
-              borderColor={T.line}
-              alignItems="center"
-              space="sm"
-              bg={T.glass}
-              sx={{
-                _web: {
-                  boxShadow: "0 12px 36px rgba(0,0,0,0.35)",
-                },
-              }}
-            >
-              <Text fontSize="$4xl">🥂</Text>
-              <Text fontSize="$md" fontWeight="$bold" color="#f3f0e6">
-                Your cart is empty
-              </Text>
-              <Text fontSize="$sm" color={T.muted} textAlign="center" lineHeight="$md">
+            <View className="items-center gap-2 rounded-bistro border border-bistro-line bg-bistro-glass p-7">
+              <Text className="text-4xl">🥂</Text>
+              <Text className="text-base font-bold text-[#f3f0e6]">Your cart is empty</Text>
+              <Text className="text-center text-sm leading-6 text-bistro-muted">
                 Browse the menu or ask the concierge to add items in one sentence.
               </Text>
-            </VStack>
+            </View>
           ) : (
-            <VStack space="sm">
+            <View className="gap-2">
               {cart.items.map((li) => {
                 const dish = catalog.dishes.find((d) => d.id === li.dishId);
                 const unit = lineUnitPrice(catalog, li.dishId, li.selectedModifiers);
                 const lineTotal = unit * li.qty;
                 return (
-                  <VStack
-                    key={li.lineId}
-                    p="$4"
-                    borderRadius="$lg"
-                    borderWidth={1}
-                    borderColor={T.line}
-                    bg={T.glass}
-                    sx={{
-                      _web: {
-                        boxShadow: "0 10px 32px rgba(0,0,0,0.35)",
-                      },
-                    }}
-                  >
-                    <HStack justifyContent="space-between" space="md">
-                      <VStack flex={1} space="xs" minWidth={0}>
-                        <Text fontSize="$md" fontWeight="$black" color={T.text}>
-                          {dish?.name ?? li.dishId}
-                        </Text>
-                        <Text fontSize="$xs" color="rgba(255,255,255,0.45)">
-                          lineId: {li.lineId.slice(0, 8)}…
-                        </Text>
-                      </VStack>
-                      <Text fontSize="$md" fontWeight="$black" color={T.goldSoft}>
+                  <View key={li.lineId} className="gap-0 rounded-bistro border border-bistro-line bg-bistro-glass p-4">
+                    <View className="flex-row justify-between gap-4">
+                      <View className="max-w-[70%] flex-1 gap-1">
+                        <Text className="text-base font-black text-bistro-text">{dish?.name ?? li.dishId}</Text>
+                        <Text className="text-xs text-white/45">lineId: {li.lineId.slice(0, 8)}…</Text>
+                      </View>
+                      <Text className="text-base font-black text-bistro-gold-soft">
                         {formatCatalogMoney(catalog.currency, lineTotal)}
                       </Text>
-                    </HStack>
+                    </View>
 
-                    <Box h={1} bg={T.line} my="$3" />
+                    <View className="my-3 h-px bg-bistro-line" />
 
-                    <VStack space="xs">
+                    <View className="gap-1">
                       {(dish?.modifierGroups ?? []).map((g) => {
                         const optId = li.selectedModifiers[g.id];
                         const opt = g.options.find((o) => o.id === optId);
                         return (
-                          <Text key={g.id} fontSize="$sm" color={T.muted}>
-                            {g.label}: <Text color="rgba(233,213,161,0.9)">{opt?.label ?? optId}</Text>
+                          <Text key={g.id} className="text-sm text-bistro-muted">
+                            {g.label}: <Text className="text-[rgba(233,213,161,0.9)]">{opt?.label ?? optId}</Text>
                           </Text>
                         );
                       })}
-                    </VStack>
+                    </View>
 
-                    <HStack justifyContent="space-between" alignItems="center" mt="$2">
-                      <HStack alignItems="center" space="md">
+                    <View className="mt-2 flex-row items-center justify-between">
+                      <View className="flex-row items-center gap-4">
                         <Pressable
-                          w={40}
-                          h={40}
-                          borderRadius="$sm"
-                          borderWidth={1}
-                          borderColor="rgba(255,255,255,0.14)"
-                          bg="rgba(0,0,0,0.25)"
-                          justifyContent="center"
-                          alignItems="center"
+                          className="h-10 w-10 items-center justify-center rounded-sm border border-white/15 bg-black/25"
                           onPress={() => setQty(li.lineId, Math.max(0, li.qty - 1))}
                         >
-                          <Text color="#fff" fontSize="$xl" fontWeight="$black">
-                            −
-                          </Text>
+                          <Text className="text-xl font-black text-white">−</Text>
                         </Pressable>
-                        <Text fontSize="$lg" fontWeight="$black" color="#fff" minWidth={28} textAlign="center">
-                          {li.qty}
-                        </Text>
+                        <Text className="min-w-[28px] text-center text-lg font-black text-white">{li.qty}</Text>
                         <Pressable
-                          w={40}
-                          h={40}
-                          borderRadius="$sm"
-                          borderWidth={1}
-                          borderColor="rgba(212,175,101,0.55)"
-                          bg="rgba(212,175,101,0.12)"
-                          justifyContent="center"
-                          alignItems="center"
+                          className="h-10 w-10 items-center justify-center rounded-sm border border-bistro-gold/55 bg-bistro-gold/15"
                           onPress={() => setQty(li.lineId, li.qty + 1)}
                         >
-                          <Text color={T.goldSoft} fontSize="$xl" fontWeight="$black">
-                            +
-                          </Text>
+                          <Text className="text-xl font-black text-bistro-gold-soft">+</Text>
                         </Pressable>
-                      </HStack>
+                      </View>
 
-                      <Button size="sm" variant="outline" action="secondary" onPress={() => removeLine(li.lineId)}>
-                        <ButtonText>Remove</ButtonText>
+                      <Button variant="outline" size="sm" onPress={() => removeLine(li.lineId)}>
+                        <ButtonText className="text-xs">Remove</ButtonText>
                       </Button>
-                    </HStack>
-                  </VStack>
+                    </View>
+                  </View>
                 );
               })}
-            </VStack>
+            </View>
           )}
         </ScrollView>
 
         {cart.items.length > 0 ? (
-          <Box position="absolute" left={0} right={0} bottom={84} borderRadius="$lg" overflow="hidden" h={54}>
-            <Pressable flex={1} onPress={() => router.push("/checkout")}>
+          <View className="absolute bottom-[84px] left-0 right-0 h-[54px] overflow-hidden rounded-bistro">
+            <Pressable className="flex-1" onPress={() => router.push("/checkout")}>
               <LinearGradient
                 colors={[T.gold, T.goldSoft, T.gold]}
                 start={{ x: 0, y: 0.5 }}
                 end={{ x: 1, y: 0.5 }}
                 style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
               >
-                <Text fontWeight="$black" color="#1a1204" fontSize="$md">
-                  Checkout preview (no payment in MVP)
-                </Text>
+                <Text className="text-base font-black text-[#1a1204]">Checkout preview (no payment in MVP)</Text>
               </LinearGradient>
             </Pressable>
-          </Box>
+          </View>
         ) : null}
-      </VStack>
-    </Box>
+      </View>
+    </View>
   );
 }

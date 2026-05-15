@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import {
   AssistantIntentRequestSchema,
   AssistantIntentResponseSchema,
+  type AssistantIntentRequest,
   type AssistantIntentResponse,
   type Catalog,
   type Dish,
@@ -10,12 +11,6 @@ import {
 import { loadCatalog } from "./catalog.js";
 import { searchDishes } from "./search.js";
 import { validateCartActions } from "./validateActions.js";
-
-function env(name: string, fallback?: string) {
-  const v = process.env[name] ?? fallback;
-  if (!v && fallback === undefined) throw new Error(`Missing env ${name}`);
-  return v as string;
-}
 
 function buildSystemPrompt(catalog: Catalog, candidates: Dish[]) {
   const miniMenu = candidates.map((d) => {
@@ -66,6 +61,53 @@ function buildSystemPrompt(catalog: Catalog, candidates: Dish[]) {
   ].join("\n");
 }
 
+function defaultSelectedModifiers(dish: Dish): Record<string, string> {
+  const selectedModifiers: Record<string, string> = {};
+  for (const g of dish.modifierGroups ?? []) {
+    const first = g.options[0];
+    if (first) selectedModifiers[g.id] = first.id;
+  }
+  return selectedModifiers;
+}
+
+/**
+ * Deterministic “AI” response for automated E2E (no LLM). Exercises the same validation path as production.
+ */
+function e2eStubAssistantResponse(
+  traceId: string,
+  catalog: Catalog,
+  input: AssistantIntentRequest,
+): AssistantIntentResponse {
+  const candidates = searchDishes(catalog, input.userText, 8);
+  const dish = candidates[0] ?? catalog.dishes[0];
+  if (!dish) {
+    return {
+      assistant_message: "[E2E stub] No dishes in catalog.",
+      cart_actions: [],
+      confidence: 0,
+      trace_id: traceId,
+    };
+  }
+  const selectedModifiers = defaultSelectedModifiers(dish);
+  const cart_actions = [{ type: "ADD_LINE" as const, dishId: dish.id, qty: 1, selectedModifiers }];
+  const v = validateCartActions(catalog, input.cart, cart_actions);
+  if (!v.ok) {
+    return {
+      assistant_message: `[E2E stub] Validation failed: ${v.reason}`,
+      cart_actions: [],
+      confidence: 0,
+      trace_id: traceId,
+    };
+  }
+  return {
+    assistant_message: `Added ${dish.name} to your cart.`,
+    cart_actions: v.actions,
+    confidence: 0.95,
+    needs_clarification: null,
+    trace_id: traceId,
+  };
+}
+
 function buildUserPayload(input: { userText: string; cartJson: string; history: { role: string; content: string }[] }) {
   return [
     "Current cart snapshot (JSON):",
@@ -79,7 +121,10 @@ function buildUserPayload(input: { userText: string; cartJson: string; history: 
   ].join("\n");
 }
 
-export async function handleAssistantIntent(body: unknown): Promise<AssistantIntentResponse> {
+export async function handleAssistantIntent(
+  body: unknown,
+  opts?: { e2eStub?: boolean },
+): Promise<AssistantIntentResponse> {
   const traceId = randomUUID();
   const parsed = AssistantIntentRequestSchema.safeParse(body);
   if (!parsed.success) {
@@ -103,9 +148,25 @@ export async function handleAssistantIntent(body: unknown): Promise<AssistantInt
     };
   }
 
+  if (opts?.e2eStub) {
+    return e2eStubAssistantResponse(traceId, catalog, input);
+  }
+
+  const apiKey = process.env.DEEPSEEK_API_KEY?.trim();
+  if (!apiKey) {
+    console.warn("[assistant] DEEPSEEK_API_KEY is not set; returning graceful response");
+    return {
+      assistant_message:
+        "AI concierge is not configured. Set DEEPSEEK_API_KEY in your server environment—for Docker Compose, add it to the project root `.env` and recreate the API container—then restart the API.",
+      cart_actions: [],
+      confidence: 0,
+      trace_id: traceId,
+    };
+  }
+
   const candidates = searchDishes(catalog, input.userText, 8);
   const client = new OpenAI({
-    apiKey: env("DEEPSEEK_API_KEY"),
+    apiKey,
     baseURL: process.env.DEEPSEEK_BASE_URL ?? "https://api.deepseek.com",
   });
 

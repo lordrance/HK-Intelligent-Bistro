@@ -1,13 +1,16 @@
+import "react-native-gesture-handler";
+import "./global.css";
+
 import { useEffect, useRef } from "react";
 import { ActivityIndicator, View } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { GluestackUIProvider } from "@gluestack-ui/themed";
-import { useAuthStore } from "../src/store/authStore";
-import { useBistroStore } from "../src/store/bistroStore";
-import { getApiBaseUrl } from "../src/lib/api";
-import { bistroConfig } from "../src/theme/gluestack-bistro-config";
+
+import { useAuthStore } from "@/store/authStore";
+import { useBistroStore } from "@/store/bistroStore";
+import { getApiBaseUrl } from "@/lib/api";
 
 export default function RootLayout() {
   const router = useRouter();
@@ -45,54 +48,47 @@ export default function RootLayout() {
 
   if (!hydrated) {
     return (
-      <GluestackUIProvider config={bistroConfig} colorMode="dark">
+      <GestureHandlerRootView style={{ flex: 1 }}>
         <SafeAreaProvider>
           <StatusBar style="light" />
-          <View
-            style={{
-              flex: 1,
-              backgroundColor: "#05060a",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
+          <View className="flex-1 items-center justify-center bg-bistro-bg">
             <ActivityIndicator color="#d4af65" size="large" />
           </View>
         </SafeAreaProvider>
-      </GluestackUIProvider>
+      </GestureHandlerRootView>
     );
   }
 
   return (
-    <GluestackUIProvider config={bistroConfig} colorMode="dark">
+    <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <StatusBar style="light" />
         <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: "#05060a" },
-          animation: "fade",
-        }}
-      >
-        <Stack.Screen name="login" />
-        <Stack.Screen name="register" />
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen
-          name="dish/[id]"
-          options={{
-            presentation: "transparentModal",
-            animation: "slide_from_bottom",
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: "#05060a" },
+            animation: "fade",
           }}
-        />
-        <Stack.Screen
-          name="checkout"
-          options={{
-            presentation: "card",
-            animation: "slide_from_bottom",
-          }}
-        />
-      </Stack>
+        >
+          <Stack.Screen name="login" />
+          <Stack.Screen name="register" />
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen
+            name="dish/[id]"
+            options={{
+              presentation: "transparentModal",
+              animation: "slide_from_bottom",
+            }}
+          />
+          <Stack.Screen
+            name="checkout"
+            options={{
+              presentation: "card",
+              animation: "slide_from_bottom",
+            }}
+          />
+        </Stack>
       </SafeAreaProvider>
-    </GluestackUIProvider>
+    </GestureHandlerRootView>
   );
 }

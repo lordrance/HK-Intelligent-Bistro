@@ -1,12 +1,10 @@
 import { Tabs } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
-import { StyleSheet, Text } from "react-native";
-import { Box } from "@gluestack-ui/themed";
+import { StyleSheet, Text, View } from "react-native";
 
 export default function TabsLayout() {
   return (
-    <Box flex={1} position="relative">
-      {/* Layered gradient: Gluestack Box + expo gradient for depth beyond flat tokens */}
+    <View className="relative flex-1">
       <LinearGradient
         colors={["#05060a", "#0c0e16", "#141a26", "#080a10"]}
         start={{ x: 0, y: 0 }}
@@ -33,6 +31,6 @@ export default function TabsLayout() {
         <Tabs.Screen name="cart" options={{ title: "Cart", tabBarIcon: () => <Text style={{ fontSize: 20 }}>🛒</Text> }} />
         <Tabs.Screen name="assistant" options={{ title: "Concierge", tabBarIcon: () => <Text style={{ fontSize: 20 }}>✨</Text> }} />
       </Tabs>
-    </Box>
+    </View>
   );
 }

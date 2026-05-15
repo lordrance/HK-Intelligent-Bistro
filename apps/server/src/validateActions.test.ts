@@ -15,13 +15,13 @@ beforeAll(async () => {
 });
 
 const milkTeaCart: Cart = {
-  currency: "HKD",
+  currency: "USD",
   items: [
     {
       lineId: "line_milk_1",
       dishId: "d_hk_milk_tea",
       qty: 1,
-      selectedModifiers: { mg_size: "mo_size_m", mg_ice: "mo_ice_hot" },
+      selectedModifiers: { mg_size: "mo_size_m", mg_ice: "mo_ice_hot", mg_sugar: "mo_sugar_full" },
     },
   ],
 };
@@ -31,12 +31,13 @@ describe("validateModifierPayload", () => {
     const r = validateModifierPayload(catalog, "d_hk_milk_tea", {
       mg_size: "mo_size_m",
       mg_ice: "mo_ice_hot",
+      mg_sugar: "mo_sugar_full",
     });
     expect(r).toEqual({ ok: true });
   });
 
   it("rejects missing required group", () => {
-    const r = validateModifierPayload(catalog, "d_hk_milk_tea", { mg_size: "mo_size_m" });
+    const r = validateModifierPayload(catalog, "d_hk_milk_tea", { mg_size: "mo_size_m", mg_sugar: "mo_sugar_full" });
     expect(r.ok).toBe(false);
     if (r.ok) return;
     expect(r.reason).toContain("Missing required modifier");
@@ -46,6 +47,7 @@ describe("validateModifierPayload", () => {
     const r = validateModifierPayload(catalog, "d_hk_milk_tea", {
       mg_size: "mo_size_m",
       mg_ice: "mo_ice_hot",
+      mg_sugar: "mo_sugar_full",
       bogus: "x",
     });
     expect(r.ok).toBe(false);
@@ -58,7 +60,7 @@ describe("validateCartActions", () => {
       {
         type: "UPDATE_MODIFIERS",
         lineId: "line_milk_1",
-        selectedModifiers: { mg_size: "mo_size_l", mg_ice: "mo_ice_less" },
+        selectedModifiers: { mg_size: "mo_size_l", mg_ice: "mo_ice_less", mg_sugar: "mo_sugar_half" },
       },
     ]);
     expect(r.ok).toBe(true);
@@ -66,7 +68,7 @@ describe("validateCartActions", () => {
 
   it("rejects UPDATE_MODIFIERS that omits a required group for that dish", () => {
     const r = validateCartActions(catalog, milkTeaCart, [
-      { type: "UPDATE_MODIFIERS", lineId: "line_milk_1", selectedModifiers: { mg_size: "mo_size_l" } },
+      { type: "UPDATE_MODIFIERS", lineId: "line_milk_1", selectedModifiers: { mg_size: "mo_size_l", mg_sugar: "mo_sugar_full" } },
     ]);
     expect(r.ok).toBe(false);
     if (r.ok) return;
@@ -78,7 +80,7 @@ describe("validateCartActions", () => {
       {
         type: "UPDATE_MODIFIERS",
         lineId: "line_milk_1",
-        selectedModifiers: { mg_size: "mo_size_m", mg_ice: "not_a_real_option" },
+        selectedModifiers: { mg_size: "mo_size_m", mg_ice: "not_a_real_option", mg_sugar: "mo_sugar_full" },
       },
     ]);
     expect(r.ok).toBe(false);
@@ -86,7 +88,7 @@ describe("validateCartActions", () => {
 
   it("rejects UPDATE_MODIFIERS for an unknown lineId", () => {
     const r = validateCartActions(catalog, milkTeaCart, [
-      { type: "UPDATE_MODIFIERS", lineId: "nope", selectedModifiers: { mg_size: "mo_size_m", mg_ice: "mo_ice_hot" } },
+      { type: "UPDATE_MODIFIERS", lineId: "nope", selectedModifiers: { mg_size: "mo_size_m", mg_ice: "mo_ice_hot", mg_sugar: "mo_sugar_full" } },
     ]);
     expect(r.ok).toBe(false);
     if (r.ok) return;

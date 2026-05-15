@@ -8,9 +8,12 @@ services:
       - "${API_PORT:-8787}:8787"
     environment:
       SERVER_PORT: "8787"
+      JWT_SECRET: ${JWT_SECRET}
       DEEPSEEK_BASE_URL: ${DEEPSEEK_BASE_URL:-https://api.deepseek.com}
       DEEPSEEK_MODEL: ${DEEPSEEK_MODEL:-deepseek-chat}
       DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY}
+    volumes:
+      - ./apps/server/data:/app/apps/server/data
     restart: unless-stopped
     healthcheck:
       test:

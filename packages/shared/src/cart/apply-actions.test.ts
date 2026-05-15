@@ -3,7 +3,7 @@ import { applyCartActions, type Cart, type CartAction } from "../index.js";
 
 describe("applyCartActions", () => {
   it("merges identical dish + modifier lines", () => {
-    const cart: Cart = { items: [], currency: "HKD" };
+    const cart: Cart = { items: [], currency: "USD" };
     const actions: CartAction[] = [
       { type: "ADD_LINE", dishId: "d_a", qty: 1, selectedModifiers: { g1: "o1" } },
       { type: "ADD_LINE", dishId: "d_a", qty: 2, selectedModifiers: { g1: "o1" } },
@@ -16,14 +16,14 @@ describe("applyCartActions", () => {
   });
 
   it("returns error for SET_QTY on unknown lineId", () => {
-    const cart: Cart = { items: [], currency: "HKD" };
+    const cart: Cart = { items: [], currency: "USD" };
     const r = applyCartActions(cart, [{ type: "SET_QTY", lineId: "missing", qty: 1 }]);
     expect(r.ok).toBe(false);
   });
 
   it("CLEAR_CART removes all lines", () => {
     const cart: Cart = {
-      currency: "HKD",
+      currency: "USD",
       items: [{ lineId: "x", dishId: "d", qty: 2, selectedModifiers: {} }],
     };
     const r = applyCartActions(cart, [{ type: "CLEAR_CART" }]);

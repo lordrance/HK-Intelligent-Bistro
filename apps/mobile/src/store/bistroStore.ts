@@ -8,6 +8,8 @@ import {
   type CartAction,
   type Catalog,
 } from "@hk/shared";
+import { apiFetch } from "../lib/authFetch";
+import { useAuthStore } from "./authStore";
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
 
@@ -17,7 +19,7 @@ type Pending = {
   confidence: number;
 };
 
-const emptyCart = (): Cart => ({ items: [], currency: "HKD" });
+const emptyCart = (currency = "USD"): Cart => ({ items: [], currency });
 
 function isAutoApply(resp: AssistantIntentResponse): boolean {
   if (resp.needs_clarification) return false;
@@ -44,6 +46,7 @@ export const useBistroStore = create<{
   confirmPending: () => void;
   dismissPending: () => void;
   undo: () => void;
+  resetAfterLogout: () => void;
 }>((set, get) => ({
   catalog: null,
   catalogLoading: true,
@@ -56,16 +59,36 @@ export const useBistroStore = create<{
   loadCatalog: async (baseUrl) => {
     set({ catalogLoading: true });
     try {
-      const res = await fetch(`${baseUrl}/catalog`);
+      const res = await apiFetch(`${baseUrl}/catalog`);
+      if (res.status === 401) {
+        await useAuthStore.getState().clearSession();
+        get().resetAfterLogout();
+        return;
+      }
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const raw: unknown = await res.json();
       const parsed = CatalogSchema.safeParse(raw);
       if (!parsed.success) throw new Error("invalid_catalog_shape");
-      set({ catalog: parsed.data, catalogLoading: false });
+      set((s) => ({
+        catalog: parsed.data,
+        catalogLoading: false,
+        cart: { ...s.cart, currency: parsed.data.currency },
+      }));
     } catch {
       set({ catalog: null, catalogLoading: false });
     }
   },
+
+  resetAfterLogout: () =>
+    set({
+      catalog: null,
+      catalogLoading: false,
+      cart: emptyCart("USD"),
+      messages: [],
+      pending: null,
+      undoStack: [],
+      assistantInFlight: false,
+    }),
 
   addLineFromMenu: ({ dishId, qty, selectedModifiers }) => {
     const result = applyCartActions(get().cart, [{ type: "ADD_LINE", dishId, qty, selectedModifiers }]);
@@ -86,7 +109,10 @@ export const useBistroStore = create<{
   },
 
   clearCart: () => {
-    set((s) => ({ undoStack: [...s.undoStack, s.cart].slice(-12), cart: emptyCart() }));
+    set((s) => ({
+      undoStack: [...s.undoStack, s.cart].slice(-12),
+      cart: emptyCart(s.catalog?.currency ?? "USD"),
+    }));
   },
 
   sendUserMessage: async (baseUrl, text) => {
@@ -117,7 +143,7 @@ export const useBistroStore = create<{
     let json: AssistantIntentResponse;
     try {
       try {
-        const res = await fetch(`${baseUrl}/assistant/intent`, {
+        const res = await apiFetch(`${baseUrl}/assistant/intent`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -127,6 +153,16 @@ export const useBistroStore = create<{
             catalogVersion: cat.version,
           }),
         });
+
+        if (res.status === 401) {
+          await useAuthStore.getState().clearSession();
+          get().resetAfterLogout();
+          set({
+            messages: [{ role: "assistant", content: "Session expired. Please sign in again." }],
+            pending: null,
+          });
+          return;
+        }
 
         let body: unknown;
         try {

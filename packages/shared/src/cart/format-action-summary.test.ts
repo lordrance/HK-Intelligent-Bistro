@@ -5,7 +5,7 @@ import { formatCartActionSummary } from "./format-action-summary.js";
 
 const miniCatalog: Catalog = {
   version: "t",
-  currency: "HKD",
+  currency: "USD",
   dishes: [
     {
       id: "d_a",
@@ -41,7 +41,7 @@ const miniCatalog: Catalog = {
 
 describe("formatCartActionSummary", () => {
   it("describes ADD_LINE with modifiers", () => {
-    const cart: Cart = { items: [], currency: "HKD" };
+    const cart: Cart = { items: [], currency: "USD" };
     const s = formatCartActionSummary(miniCatalog, cart, {
       type: "ADD_LINE",
       dishId: "d_a",
@@ -55,7 +55,7 @@ describe("formatCartActionSummary", () => {
 
   it("describes REMOVE_LINE using cart context", () => {
     const cart: Cart = {
-      currency: "HKD",
+      currency: "USD",
       items: [
         {
           lineId: "ln1",
