@@ -163,15 +163,27 @@ export default function CartScreen() {
         </ScrollView>
 
         {cart.items.length > 0 ? (
-          <View className="absolute bottom-[84px] left-0 right-0 h-[54px] overflow-hidden rounded-bistro">
-            <Pressable className="flex-1" onPress={() => router.push("/checkout")}>
+          <View
+            pointerEvents="box-none"
+            className="absolute bottom-[84px]"
+            style={{ left: shell.pagePadding, right: shell.pagePadding }}
+          >
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Checkout"
+              onPress={() => router.push("/checkout")}
+              className="self-center overflow-hidden rounded-bistro"
+              style={{ maxWidth: 420, width: "100%" }}
+            >
               <LinearGradient
                 colors={[T.gold, T.goldSoft, T.gold]}
                 start={{ x: 0, y: 0.5 }}
                 end={{ x: 1, y: 0.5 }}
-                style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+                style={{ height: 48, alignItems: "center", justifyContent: "center", paddingHorizontal: 16 }}
               >
-                <Text className="text-base font-black text-[#1a1204]">Checkout preview (no payment in MVP)</Text>
+                <Text className="text-sm font-black text-[#1a1204]" numberOfLines={1}>
+                  Checkout
+                </Text>
               </LinearGradient>
             </Pressable>
           </View>

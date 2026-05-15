@@ -46,7 +46,16 @@ export default function AssistantScreen() {
 
   const canSend = !!catalog && !catalogLoading && !busy;
 
-  const bubbleMaxStyle = shell.isWeb ? { maxWidth: Math.min(560, shell.innerWidth * 0.92) } : { maxWidth: "86%" as const };
+  const chatGutter = shell.pagePadding * 2 + 16;
+  const bubbleMaxStyle = shell.isWeb
+    ? { maxWidth: Math.min(520, Math.max(220, shell.innerWidth - chatGutter)), minWidth: 0 as const }
+    : { maxWidth: "86%" as const };
+
+  const scrollContentPad = {
+    paddingHorizontal: shell.pagePadding,
+    paddingBottom: 16,
+    gap: 10 as const,
+  };
 
   return (
     <KeyboardAvoidingView className="flex-1" behavior={Platform.OS === "ios" ? "padding" : undefined}>
@@ -54,7 +63,7 @@ export default function AssistantScreen() {
         <BistroScreenBackground />
         <View
           className="w-full max-w-[960px] flex-1 self-center"
-          style={Platform.OS === "web" ? { minHeight: 0 } : undefined}
+          style={Platform.OS === "web" ? { minHeight: 0, overflow: "hidden" } : undefined}
         >
           <View className="mb-3 gap-1">
             <Text className="text-xs uppercase tracking-[2px] text-bistro-gold-dim">Concierge</Text>
@@ -82,8 +91,9 @@ export default function AssistantScreen() {
             className="flex-1 bg-bistro-bg"
             style={scrollViewFill()}
             showsVerticalScrollIndicator
+            showsHorizontalScrollIndicator={false}
             onContentSizeChange={() => scrollRef.current?.scrollToEnd({ animated: true })}
-            contentContainerStyle={{ paddingBottom: 16, gap: 10 }}
+            contentContainerStyle={scrollContentPad}
           >
             {messages.length === 0 ? (
               <View className="gap-2 rounded-bistro border border-bistro-line bg-bistro-glass p-5">
@@ -98,10 +108,16 @@ export default function AssistantScreen() {
               return (
                 <View key={idx} className={mine ? "items-end" : "items-start"}>
                   <View
-                    className={`rounded-md border p-3.5 ${mine ? "border-bistro-gold/35 bg-bistro-gold/15" : "border-bistro-line bg-bistro-glass"}`}
+                    className={`min-w-0 rounded-md border p-3.5 ${mine ? "border-bistro-gold/35 bg-bistro-gold/15" : "border-bistro-line bg-bistro-glass"}`}
                     style={bubbleMaxStyle}
                   >
-                    <Text className="text-sm leading-6 text-[#f3f0e6]">{m.content}</Text>
+                    <Text
+                      className="text-sm leading-6 text-[#f3f0e6]"
+                      selectable={false}
+                      style={Platform.OS === "web" ? ({ maxWidth: "100%" } as const) : undefined}
+                    >
+                      {m.content}
+                    </Text>
                   </View>
                 </View>
               );
